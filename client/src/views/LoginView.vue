@@ -24,44 +24,20 @@
 import { reactive } from "vue";
 import { useRouter } from "vue-router";
 import { useStore } from "@/stores/main";
+import useAuth from "@/use/auth";
 
 const router = useRouter();
 const store = useStore();
+
+const { login } = useAuth(store, router);
 
 const form = reactive({
   email: "",
   password: "",
 });
 
-async function login() {
-  try {
-    const response = await fetch("http://localhost:3000/login", {
-      method: "POST",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(form),
-    });
-
-    const data = await response.json();
-
-    if (data.email) {
-      store.$patch((state) => {
-        state.auth.user = data;
-      });
-
-      router.push({ name: "dashboard" });
-    }
-  } catch (err) {
-    console.log(err);
-  } finally {
-    console.log("done");
-  }
-}
-
 function submit() {
-  login();
+  login(form);
 }
 </script>
 
