@@ -9,6 +9,15 @@ import jwt from "jsonwebtoken";
 import mercurius, { IResolvers } from "mercurius";
 import mercuriusCodegen, { gql } from "mercurius-codegen";
 
+interface Payload {
+  data: User;
+}
+
+interface User {
+  id: string;
+  email: string;
+}
+
 // TODO: change salt rounds
 // https://security.stackexchange.com/questions/17207/recommended-of-rounds-for-bcrypt
 const saltRounds = 11;
@@ -30,7 +39,74 @@ export const buildContext = async (
   };
 };
 
-app.post("/login", async (request, reply) => {
+// Checks if JWT token from cookie is valid
+app.get("/gatekeeper", async (req, reply) => {
+  if (!req.cookies.astralreader_data)
+    return reply.code(403).send("Not Authorized.");
+
+  try {
+    const { valid, value } = req.unsignCookie(req.cookies.astralreader_data);
+
+    if (!valid || !value) {
+      // TODO: log user's IP and info
+      return reply.code(403).send("This request has been reported.");
+    }
+
+    const decoded = jwt.verify(value, process.env.JWT_SECRET!) as Payload;
+
+    const { id, email } = decoded.data;
+
+    if (!id || !email)
+      return reply.code(403).send("This request has been reported.");
+
+    const query = gql`
+      query User($id: ID!, $email: String!) {
+        user(id: $id, email: $email) {
+          id
+          email
+        }
+      }
+    `;
+
+    const gqlResponse = await app.graphql(query, undefined, {
+      id,
+      email,
+    });
+
+    if (!gqlResponse || !gqlResponse.data?.user)
+      throw new Error("Request reported.");
+
+    const { user } = gqlResponse.data;
+
+    const token = jwt.sign(
+      {
+        data: {
+          id: user.id,
+          email: user.email,
+        },
+      },
+      process.env.JWT_SECRET!,
+      { expiresIn: "1h" }
+    );
+
+    // milli * seconds * minutes * hours * days
+    // new Date(Date.now() + 1000 * 60 * 60 * 24)
+    return reply
+      .setCookie("astralreader_data", token, {
+        expires: new Date(Date.now() + 1000 * 60 * 60 * 1), // 1 hour
+        domain: "localhost",
+        path: "/gatekeeper",
+        httpOnly: true,
+        secure: true,
+        signed: true,
+      })
+      .send({ email: user.email });
+  } catch (err) {
+    return reply.code(500).send(err);
+  }
+});
+
+app.post("/gatekeeper/login", async (request, reply) => {
   interface LoginBody {
     email?: string;
     password?: string;
@@ -54,7 +130,7 @@ app.post("/login", async (request, reply) => {
     console.log(JSON.stringify(gqlResponse, null, 4));
 
     if (!gqlResponse.data || !gqlResponse.data.login)
-      return reply.code(404).send("Email or password incorrect.");
+      return reply.code(401).send("Email or password incorrect.");
 
     const { login } = gqlResponse.data;
 
@@ -62,19 +138,20 @@ app.post("/login", async (request, reply) => {
       {
         data: {
           id: login.id,
+          email: login.email,
         },
       },
-      "super-secret",
+      process.env.JWT_SECRET!,
       { expiresIn: "1h" }
     );
 
     // milli * seconds * minutes * hours * days
     // new Date(Date.now() + 1000 * 60 * 60 * 24)
     return reply
-      .setCookie("astroreader_data", token, {
-        expires: new Date(Date.now() + 1000 * 60 * 60 * 1),
+      .setCookie("astralreader_data", token, {
+        expires: new Date(Date.now() + 1000 * 60 * 60 * 1), // 1 hour
         domain: "localhost",
-        path: "/login",
+        path: "/gatekeeper",
         httpOnly: true,
         secure: true,
         signed: true,
@@ -93,7 +170,7 @@ const schema = gql`
   }
 
   type Query {
-    test: String
+    user(id: ID!, email: String!): User
   }
 
   type Mutation {
@@ -104,7 +181,18 @@ const schema = gql`
 
 const resolvers: IResolvers = {
   Query: {
-    test: () => "hi",
+    user: async (_parent, args, _context, _info) => {
+      const { id, email } = args;
+
+      const foundUser = await Users.findOne({
+        email,
+      });
+
+      if (!foundUser) return null;
+      if (stringify(foundUser._id.buffer) !== id) return null;
+
+      return { id, email };
+    },
   },
   Mutation: {
     login: async (_parent, args, _context, _info) => {
