@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "outDir": "./built/",
+    "noImplicitAny": true,
+    "module": "CommonJS",
+    "target": "ES5",
+    "allowJs": true,
+    "moduleResolution": "Node",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "sourceMap": true,
+    "baseUrl": "./src",
+    "paths": {
+      "@db": ["db"],
+      "@db/*": ["db/*"]
+    }
+  }
+}
