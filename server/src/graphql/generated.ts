@@ -40,7 +40,12 @@ export type User = {
 
 export type Query = {
   __typename?: "Query";
-  test?: Maybe<Scalars["String"]>;
+  user?: Maybe<User>;
+};
+
+export type QueryuserArgs = {
+  id: Scalars["ID"];
+  email: Scalars["String"];
 };
 
 export type Mutation = {
@@ -190,7 +195,12 @@ export type QueryResolvers<
   ContextType = MercuriusContext,
   ParentType extends ResolversParentTypes["Query"] = ResolversParentTypes["Query"]
 > = {
-  test?: Resolver<Maybe<ResolversTypes["String"]>, ParentType, ContextType>;
+  user?: Resolver<
+    Maybe<ResolversTypes["User"]>,
+    ParentType,
+    ContextType,
+    RequireFields<QueryuserArgs, "id" | "email">
+  >;
 };
 
 export type MutationResolvers<
