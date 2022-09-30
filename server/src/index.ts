@@ -3,11 +3,13 @@ import Users from "@db/collections/Users";
 import type { FastifyCookieOptions } from "@fastify/cookie";
 import cookie from "@fastify/cookie";
 import cors from "@fastify/cors";
+import fastifyStatic from "@fastify/static";
 import bcrypt from "bcrypt";
 import Fastify, { FastifyReply, FastifyRequest } from "fastify";
 import jwt from "jsonwebtoken";
 import mercurius, { IResolvers } from "mercurius";
 import mercuriusCodegen, { gql } from "mercurius-codegen";
+import path from "path";
 
 interface Payload {
   data: User;
@@ -253,23 +255,33 @@ const resolvers: IResolvers = {
   },
 };
 
-app.register(mercurius, {
-  schema,
-  resolvers,
-  context: buildContext,
-  graphiql: true,
-});
-
-app.register(cookie, {
-  secret: "my-cookie-secret",
-} as FastifyCookieOptions);
-
 const start = async () => {
   try {
+    await app.register(cookie, {
+      secret: "my-cookie-secret",
+    } as FastifyCookieOptions);
+
+    await app.register(fastifyStatic, {
+      root: path.join(__dirname, "public"),
+      allowedPath: (_pathName, _root, request) => {
+        // console.log(request.headers.authorization, "yeet");
+        if (!request.headers.authorization) return false;
+        return true;
+      },
+    });
+
     await app.register(cors, {
       origin: "http://localhost:8080",
       credentials: true,
     });
+
+    await app.register(mercurius, {
+      schema,
+      resolvers,
+      context: buildContext,
+      graphiql: true,
+    });
+
     await mercuriusCodegen(app, {
       targetPath: "./src/graphql/generated.ts",
     });
