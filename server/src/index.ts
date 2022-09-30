@@ -1,13 +1,14 @@
-import db from "@db";
 import type { FastifyCookieOptions } from "@fastify/cookie";
 import cookie from "@fastify/cookie";
 import cors, { FastifyCorsOptions } from "@fastify/cors";
 import fastifyStatic, { FastifyStaticOptions } from "@fastify/static";
-import routes from "@routes";
-import astralGraphql from "astral-graphql";
+import astralGraphql from "@plugins/astral-graphql";
+import db from "@plugins/db";
+import routes from "@plugins/routes";
 import dotenv from "dotenv";
 import Fastify from "fastify";
 import path from "path";
+
 dotenv.config();
 
 const app = Fastify({ logger: true });

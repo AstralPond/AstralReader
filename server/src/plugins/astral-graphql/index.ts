@@ -1,4 +1,4 @@
-import { CustomDb } from "@/db";
+import { CustomDb } from "@plugins/db";
 import bcrypt from "bcrypt";
 import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import fp from "fastify-plugin";

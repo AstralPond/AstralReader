@@ -1,4 +1,4 @@
-import loginRoute from "@/routes/gatekeeper/login";
+import loginRoute from "@plugins/routes/gatekeeper/login";
 import { FastifyInstance } from "fastify";
 import jwt from "jsonwebtoken";
 import { gql } from "mercurius-codegen";

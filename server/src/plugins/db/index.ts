@@ -30,6 +30,18 @@ function stringify(buffer: Buffer, delimiter: string = "-") {
   ].join(delimiter);
 }
 
+/**
+ * A plugin that adds the mongodb driver to the app
+ * @example
+ *
+ * import db from '@plugins/db'
+ *
+ * const app = Fastify({ logger: true })
+ *
+ * await app.register(db)
+ *
+ * app.db.collection("users").findOne({email: "johndoe@example.com"})
+ */
 export default fp(async function db(app: FastifyInstance) {
   const uri = process.env.MONGO_URI || "";
   const client = new MongoClient(uri, {
@@ -45,6 +57,11 @@ export default fp(async function db(app: FastifyInstance) {
   app.decorate("idStringify", stringify);
 });
 
+/**
+ * Adds native mongodb shell like syntax to db
+ * @param {Db} db - MongoDB instance
+ * @returns {CustomDb} - returns customized db
+ */
 function customizeDb(db: Db): CustomDb {
   let customDb: any = db;
   customDb.users = db.collection("users");
