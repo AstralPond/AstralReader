@@ -13,8 +13,12 @@
     "sourceMap": true,
     "baseUrl": "./src",
     "paths": {
+      "@/*": ["./*"],
       "@db": ["db"],
-      "@db/*": ["db/*"]
+      "@db/*": ["db/*"],
+      "@routes": ["routes"],
+      "@routes/*": ["routes/*"],
+      "@astral/graphql": ["astral-graphql"]
     }
   }
 }
