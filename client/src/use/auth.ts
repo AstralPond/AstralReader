@@ -2,6 +2,26 @@ import { State, useStore } from "@/stores/main";
 import { Store, storeToRefs } from "pinia";
 import { Router, useRouter } from "vue-router";
 
+/**
+ * Checks with server if cookie authentication is valid, then updates
+ * the pinia state with the server response
+ *
+ * @example
+ * <template>
+ *     <form @submit="onSubmit"></form>
+ * </template>
+ * <script setup lang="ts">
+ *  import useAuth from "@/use/auth"
+ *
+ *  const {auth, login } = useAuth()
+ *
+ *  function onSubmit(e) {
+ *      e.preventDefault();
+ *      login();
+ *  }
+ * </script>
+ *
+ */
 export default function useAuth(s: Store<"main", State>, r: Router) {
   const store = s || useStore();
   const router = r || useRouter();

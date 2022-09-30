@@ -36,7 +36,8 @@ const form = reactive({
   password: "",
 });
 
-function submit() {
+function submit(e: Event) {
+  e.preventDefault();
   login(form);
 }
 </script>
