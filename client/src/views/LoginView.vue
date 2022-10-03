@@ -4,7 +4,7 @@
       <img :src="require('@/assets/login-image.jpg')" alt="space graphic" />
       <div class="box">
         <h2>Log In</h2>
-        <form @submit="submit" v-on:keyup.enter="submit">
+        <form @submit.prevent="submit" v-on:keyup.enter="submit">
           <div class="email">
             <label for="email">email</label>
             <input id="email" type="email" v-model="form.email" />
@@ -13,7 +13,7 @@
             <label for="password">password</label>
             <input id="password" type="password" v-model="form.password" />
           </div>
-          <a @click="submit" class="btn" href="#">Log In</a>
+          <a @click.prevent="submit" class="btn">Log In</a>
         </form>
       </div>
     </div>
@@ -36,8 +36,7 @@ const form = reactive({
   password: "",
 });
 
-function submit(e: Event) {
-  e.preventDefault();
+function submit() {
   login(form);
 }
 </script>
@@ -121,6 +120,7 @@ form {
   vertical-align: middle;
 }
 
+.btn,
 .btn:visited,
 .btn:link {
   color: white;
@@ -131,5 +131,6 @@ form {
   padding-top: 1.5rem;
   padding-bottom: 1.5rem;
   font-weight: 700;
+  cursor: pointer;
 }
 </style>
