@@ -24,7 +24,7 @@ export default fp(async function astralGraphql(
 
   // Generate file for typescript autocompletion
   mercuriusCodegen(app, {
-    targetPath: "./src/astral-graphql/generated.ts",
+    targetPath: "./src/plugins/astral-graphql/generated.ts",
   });
 });
 
