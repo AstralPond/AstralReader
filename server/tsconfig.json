@@ -15,6 +15,9 @@
     "paths": {
       "@/*": ["./*"],
       "@plugins/*": ["plugins/*"]
-    }
+    },
+    "plugins": [
+      { "transform": "@zerollup/ts-transform-paths"}
+    ]
   }
 }
