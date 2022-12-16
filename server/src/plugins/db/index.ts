@@ -1,18 +1,16 @@
 import { FastifyInstance } from "fastify";
 import fp from "fastify-plugin";
-import { Binary, Collection, Db, MongoClient } from "mongodb";
-import { v4 as uuidv4 } from "uuid";
+import { client } from "db";
+import { Binary, Collection, Db } from "mongodb";
+import { Library } from '@/db/collections/Libraries'
+import { User } from '@/db/collections/Users'
 
 type Stringify = (buffer: Buffer, delimiter?: string) => string;
 
-interface User {
-  _id?: Binary;
-  email: string;
-  password: string;
-}
-
+// TODO: create script to autogenerate this code
 export interface CustomDb extends Db {
   users: Collection<User>;
+  libraries: Collection<Library>
   stringify: Stringify;
 }
 
@@ -43,18 +41,8 @@ function stringify(buffer: Buffer, delimiter: string = "-") {
  * app.db.collection("users").findOne({email: "johndoe@example.com"})
  */
 export default fp(async function db(app: FastifyInstance) {
-  const uri = process.env.MONGO_URI || "";
-  const client = new MongoClient(uri, {
-    pkFactory: {
-      createPk: () =>
-        new Binary(uuidv4(null, Buffer.alloc(16)), Binary.SUBTYPE_UUID),
-    },
-  });
-
   const db = client.db(process.env.DB_NAME);
-
   app.decorate("db", customizeDb(db));
-  app.decorate("idStringify", stringify);
 });
 
 /**
@@ -62,9 +50,11 @@ export default fp(async function db(app: FastifyInstance) {
  * @param {Db} db - MongoDB instance
  * @returns {CustomDb} - returns customized db
  */
+// TODO: create script to autogenerate this code
 function customizeDb(db: Db): CustomDb {
   let customDb: any = db;
   customDb.users = db.collection("users");
+  customDb.libraries = db.collection("libraries");
   customDb.stringify = stringify;
 
   return customDb;
