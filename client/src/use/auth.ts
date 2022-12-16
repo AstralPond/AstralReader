@@ -39,6 +39,7 @@ interface LoginBody {
 function login(store: Store, router: Router) {
   return async (body: LoginBody) => {
     try {
+      // TODO: make url dynamic
       const response = await fetch("http://localhost:3000/gatekeeper/login", {
         method: "POST",
         credentials: "include",
