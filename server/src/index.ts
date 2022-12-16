@@ -2,16 +2,16 @@ import type { FastifyCookieOptions } from "@fastify/cookie";
 import cookie from "@fastify/cookie";
 import cors, { FastifyCorsOptions } from "@fastify/cors";
 import fastifyStatic, { FastifyStaticOptions } from "@fastify/static";
-import astralGraphql from "@plugins/astral-graphql";
-import db from "@plugins/db";
+import astralGraphqlPlugin from "@plugins/astral-graphql";
+import dbPlugin from "@plugins/db";
 import routes from "@plugins/routes";
-import dotenv from "dotenv";
 import Fastify from "fastify";
 import path from "path";
 
-dotenv.config();
-
 const app = Fastify({ logger: true });
+
+// The path to the public directory (where we make symlinks to libraries)
+export const PUBLIC_DIRECTORY = path.join(__dirname, "public")
 
 const corsOptions: FastifyCorsOptions = {
   origin: "http://localhost:8080",
@@ -19,10 +19,10 @@ const corsOptions: FastifyCorsOptions = {
 };
 
 const fastifyStaticOptions: FastifyStaticOptions = {
-  root: path.join(__dirname, "public"),
+  root: PUBLIC_DIRECTORY,
   allowedPath: (_pathName, _root, request) => {
-    // console.log(request.headers.authorization, "yeet");
-    if (!request.headers.authorization) return false;
+    console.log(request.headers.authorization, "yeet");
+    // if (!request.headers.authorization) return false;
     return true;
   },
 };
@@ -34,8 +34,8 @@ const cookieOptions: FastifyCookieOptions = {
 const start = async () => {
   try {
     // Load Plugins
-    await app.register(db);
-    await app.register(astralGraphql);
+    await app.register(dbPlugin);
+    await app.register(astralGraphqlPlugin);
     await app.register(routes);
 
     await app.register(cookie, cookieOptions);
@@ -45,6 +45,7 @@ const start = async () => {
 
     // Start app
     await app.listen({ port: 3000 });
+
   } catch (err) {
     app.log.error(err);
     process.exit(1);
