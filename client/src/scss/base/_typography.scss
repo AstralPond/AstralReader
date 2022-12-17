@@ -1,0 +1,196 @@
+@use "sass:list";
+@use "@/scss/abstracts/functions";
+@use "@/scss/abstracts/variables";
+
+.link {
+  color: functions.get-color("alias", "grayscale", "header");
+
+  &:hover {
+    color: functions.get-color("alias", "primary", "default");
+  }
+
+  &:focus {
+    color: functions.get-color("alias", "primary", "strong");
+  }
+
+  &:active {
+    color: functions.get-color("alias", "primary", "header");
+  }
+}
+
+.link-dark {
+  color: functions.get-color("alias", "grayscale", "bg");
+
+  &:hover {
+    color: functions.get-color("alias", "primary", "weak");
+  }
+
+  &:focus {
+    color: functions.get-color("alias", "primary", "bg-strong");
+  }
+
+  &:active {
+    color: functions.get-color("alias", "primary", "bg");
+  }
+}
+
+$styles: (
+  "desktop": (
+    "display": (
+      "font-size": (
+        "huge": 6.4rem,
+        "large": 5.6rem,
+        "medium": 4.8rem,
+        "small": 3.6rem,
+        "x-small": 2.4rem,
+      ),
+      "line-height": (
+        "huge": 8.8rem,
+        "large": 7.2rem,
+        "medium": 5.6rem,
+        "small": 4.8rem,
+        "x-small": 3.2rem,
+      ),
+    ),
+    "text": (
+      "font-size": (
+        "large": 2rem,
+        "medium": 1.8rem,
+        "small": 1.5rem,
+        "x-small": 1.3rem,
+      ),
+      "line-height": (
+        "large": 3.4rem,
+        "medium": 2.8rem,
+        "small": 2.4rem,
+        "x-small": 2rem,
+      ),
+      "tight-line-height": (
+        "large": 2.4rem,
+        "medium": 2.4rem,
+        "small": 2rem,
+        "x-small": 1.6rem,
+      ),
+    ),
+  ),
+  "mobile": (
+    "display": (
+      "font-size": (
+        "large": 3.4rem,
+        "medium": 2.8rem,
+        "small": 2.4rem,
+        "x-small": 2rem,
+      ),
+      "line-height": (
+        "large": 4.4rem,
+        "medium": 4rem,
+        "small": 3.4rem,
+        "x-small": 3.2rem,
+      ),
+    ),
+    "text": (
+      "font-size": (
+        "large": 2rem,
+        "medium": 1.7rem,
+        "small": 1.5rem,
+        "x-small": 1.3rem,
+      ),
+      "line-height": (
+        "large": 3.2rem,
+        "medium": 2.8rem,
+        "small": 2.4rem,
+        "x-small": 2.2rem,
+      ),
+      "tight-line-height": (
+        "large": 2.4rem,
+        "medium": 2.4rem,
+        "small": 2rem,
+        "x-small": 1.6rem,
+      ),
+    ),
+  ),
+);
+
+$sizes: "huge", "large", "medium", "small", "x-small";
+$screens: "desktop", "mobile";
+$font-types: "display", "text";
+
+@function get-letter-spacing($screen, $size) {
+  @if $screen == "desktop" {
+    @return 0.1rem;
+  } @else if $size == "x-small" {
+    @return 0.025rem;
+  } @else {
+    @return 0.075rem;
+  }
+}
+
+@for $i from 1 through length($screens) {
+  $screen: nth($screens, $i);
+
+  @for $j from 1 through length($font-types) {
+    $font-type: nth($font-types, $j);
+    $range: null;
+    @if $screen == "desktop" and $font-type == "display" {
+      $range: (1, 5); // loop for: huge, large, medium, small, x-small (5 sizes)
+    } @else {
+      $range: (2, 5); // loop for: large, medium, small, x-small (4 sizes)
+    }
+
+    @for $k from nth($range, 1) through nth($range, 2) {
+      $size: nth($sizes, $k);
+      .#{$screen} {
+        &-#{$font-type} {
+          &-#{$size} {
+            font-weight: 400;
+            letter-spacing: get-letter-spacing($screen, $size);
+            font-size: functions.map-deep-get(
+              $styles,
+              $screen,
+              $font-type,
+              "font-size",
+              $size
+            );
+            line-height: functions.map-deep-get(
+              $styles,
+              $screen,
+              $font-type,
+              "line-height",
+              $size
+            );
+
+            @if $font-type == "text" {
+              &--tight {
+                @extend .#{$screen}-text-#{$size};
+                line-height: functions.map-deep-get(
+                  $styles,
+                  $screen,
+                  $font-type,
+                  "tight-line-height",
+                  $size
+                );
+              }
+            }
+          }
+        }
+
+        @if $font-type == "text" {
+          &-link-#{$size} {
+            @extend .#{$screen}-text-#{$size};
+            font-weight: 600;
+            &--tight {
+              @extend .#{$screen}-text-#{$size};
+              line-height: functions.map-deep-get(
+                $styles,
+                $screen,
+                $font-type,
+                "tight-line-height",
+                $size
+              );
+            }
+          }
+        }
+      }
+    }
+  }
+}

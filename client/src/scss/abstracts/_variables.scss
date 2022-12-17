@@ -2,6 +2,7 @@
 $colors: (
   "alias": (
     "grayscale": (
+      "header": #14142B,
       "header-weak": #262338,
       "body": #4e4b66,
       "label": #6e7191,
@@ -12,30 +13,35 @@ $colors: (
       "bg": #fcfcfc,
     ),
     "primary": (
+      "default": #610bef,
       "strong": #4700ab,
       "weak": #a996ff,
       "bg-strong": #bfbefc,
       "bg": #ebecfe,
     ),
     "secondary": (
+      "default": #005BD4,
       "strong": #0041ac,
       "weak": #50c8fc,
       "bg-strong": #8de9ff,
       "bg": #e3feff,
     ),
     "success": (
+      "default": #008A00,
       "strong": #067306,
       "weak": #a6f787,
       "bg-strong": #cbffae,
       "bg": #eaf9de,
     ),
     "warning": (
+      "default": #EAAC30,
       "strong": #946300,
       "weak": #ffdf9a,
       "bg-strong": #ffe6b0,
       "bg": #fff8e9,
     ),
     "danger": (
+      "default": #CA024F,
       "strong": #9e0038,
       "weak": #ff75cb,
       "bg-strong": #ffabe8,
@@ -164,8 +170,4 @@ $colors: (
       "800": #07540a,
     ),
   ),
-);
-
-$gradients: (
-  "34": linear-gradient(95.08deg, #ae5388 2.49%, #3d1052 97.19%),
 );

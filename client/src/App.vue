@@ -5,9 +5,9 @@
 </template>
 
 <script setup lang="ts">
-import "./scss/main.module.scss";
 import { useStore } from "@/stores/main";
 import { useRouter } from "vue-router";
+import "./scss/main.scss";
 
 const store = useStore();
 const router = useRouter();

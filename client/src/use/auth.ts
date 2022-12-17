@@ -1,6 +1,6 @@
-import { State, useStore } from "@/stores/main";
-import { Store, storeToRefs } from "pinia";
-import { Router, useRouter } from "vue-router";
+import { type State, useStore } from "@/stores/main";
+import { type Store, storeToRefs } from "pinia";
+import { type Router, useRouter } from "vue-router";
 
 /**
  * Checks with server if cookie authentication is valid, then updates

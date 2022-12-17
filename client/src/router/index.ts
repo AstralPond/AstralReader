@@ -1,6 +1,11 @@
 import DashboardView from "@/views/DashboardView.vue";
+import InitialSetupView from "@/views/InitialSetupView.vue";
 import LoginView from "@/views/LoginView.vue";
-import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
+import {
+  createRouter,
+  createWebHistory,
+  type RouteRecordRaw,
+} from "vue-router";
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -14,18 +19,14 @@ const routes: Array<RouteRecordRaw> = [
     component: DashboardView,
   },
   {
-    path: "/",
-    name: "about",
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () =>
-      import(/* webpackChunkName: "about" */ "../views/AboutView.vue"),
+    path: "/initial-setup",
+    name: "initialSetup",
+    component: InitialSetupView,
   },
 ];
 
 const router = createRouter({
-  history: createWebHistory(process.env.BASE_URL),
+  history: createWebHistory(import.meta.env.BASE_URL),
   routes,
 });
 

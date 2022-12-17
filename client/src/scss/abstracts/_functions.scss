@@ -1,6 +1,19 @@
+@use "@/scss/abstracts/variables";
 @function map-deep-get($map, $keys...) {
-    @each $key in $keys {
-        $map: map-get($map, $key);
-    }
-    @return $map;
+  @each $key in $keys {
+    $map: map-get($map, $key);
+  }
+  @return $map;
+}
+
+@function get-color($keys...) {
+  @return map-deep-get(variables.$colors, $keys...);
+}
+
+@function toRgb($color) {
+    @return rgb(red($color), green($color), blue($color));
+}
+
+@function toRgba($color, $alpha) {
+    @return rgba(toRgb($color), $alpha);
 }
