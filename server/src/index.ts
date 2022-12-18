@@ -14,7 +14,7 @@ const app = Fastify({ logger: true });
 export const PUBLIC_DIRECTORY = path.join(__dirname, "public")
 
 const corsOptions: FastifyCorsOptions = {
-  origin: "http://localhost:8080",
+  origin: "http://localhost:5173",
   credentials: true,
 };
 

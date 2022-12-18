@@ -2,7 +2,7 @@
 $colors: (
   "alias": (
     "grayscale": (
-      "header": #14142B,
+      "header": #14142b,
       "header-weak": #262338,
       "body": #4e4b66,
       "label": #6e7191,
@@ -20,28 +20,28 @@ $colors: (
       "bg": #ebecfe,
     ),
     "secondary": (
-      "default": #005BD4,
+      "default": #005bd4,
       "strong": #0041ac,
       "weak": #50c8fc,
       "bg-strong": #8de9ff,
       "bg": #e3feff,
     ),
     "success": (
-      "default": #008A00,
+      "default": #008a00,
       "strong": #067306,
       "weak": #a6f787,
       "bg-strong": #cbffae,
       "bg": #eaf9de,
     ),
     "warning": (
-      "default": #EAAC30,
+      "default": #eaac30,
       "strong": #946300,
       "weak": #ffdf9a,
       "bg-strong": #ffe6b0,
       "bg": #fff8e9,
     ),
     "danger": (
-      "default": #CA024F,
+      "default": #ca024f,
       "strong": #9e0038,
       "weak": #ff75cb,
       "bg-strong": #ffabe8,
@@ -171,3 +171,26 @@ $colors: (
     ),
   ),
 );
+
+// display
+$displays: block, inline-block, none, flex, grid;
+
+// justify-content
+$justify-content-values: (
+  start,
+  center,
+  space-between,
+  space-around,
+  space-evenly
+);
+
+// align-items
+$align-items-values: (stretch, center, start, end);
+// flex-direction
+$flex-direction-values: (row, row-reverse, column, column-reverse);
+
+// vertical-align
+$vertical-align-values: (baseline, top, middle, bottom, sub, text-top);
+
+// text-align
+$text-align-values: (start, end, center, justify);

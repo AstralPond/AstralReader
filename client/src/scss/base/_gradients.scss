@@ -1,0 +1,9 @@
+$gradients: (
+  "34": linear-gradient(95.08deg, #ae5388 2.49%, #3d1052 97.19%),
+);
+
+@each $number, $style in $gradients {
+  .gradient-#{$number} {
+    background: $style;
+  }
+}

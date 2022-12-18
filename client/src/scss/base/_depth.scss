@@ -1,8 +1,5 @@
 @use "sass:color";
 @use "@/scss/abstracts/functions";
-$gradients: (
-  "34": linear-gradient(95.08deg, #ae5388 2.49%, #3d1052 97.19%),
-);
 
 // for filter: drop-shadow(x, y, blur, color)
 // does not include x and actual color
@@ -11,72 +8,63 @@ $elevations: (
   (
       "y": 0.4rem,
       "blur": 0.4rem,
-      "opacity": 0.2,
+      "opacity": 0.02,
     ),
   // 2
   (
       "y": 0.6rem,
       "blur": 0.8rem,
-      "opacity": 0.2,
+      "opacity": 0.02,
     ),
   // 3
   (
       "y": 0.8rem,
       "blur": 1rem,
-      "opacity": 0.2,
+      "opacity": 0.02,
     ),
   // 4
   (
       "y": 1rem,
       "blur": 1.5rem,
-      "opacity": 0.3,
+      "opacity": 0.03,
     ),
   // 5
   (
       "y": 1.5rem,
       "blur": 2rem,
-      "opacity": 0.4,
+      "opacity": 0.04,
     ),
   // 6
   (
       "y": 2.5rem,
       "blur": 3rem,
-      "opacity": 0.5,
+      "opacity": 0.05,
     ),
   // 7
   (
       "y": 3.5rem,
       "blur": 4rem,
-      "opacity": 0.6,
+      "opacity": 0.06,
     ),
   // 8
   (
       "y": 4rem,
       "blur": 5rem,
-      "opacity": 0.7,
+      "opacity": 0.07,
     ),
   // 9
   (
       "y": 5rem,
       "blur": 6rem,
-      "opacity": 0.8,
+      "opacity": 0.08,
     ),
   // 10
   (
       "y": 6rem,
       "blur": 7rem,
-      "opacity": 0.8,
+      "opacity": 0.08,
     )
 );
-
-// $level is a number from 1-10
-@mixin elevation($level) {
-  $values: nth($elevations, $level);
-  $y: map-get($values, "y");
-  $blur: map-get($values, "blur");
-  $opacity: map-get($values, "opacity");
-  filter: drop-shadow(0 $y $blur functions.toRgba(#000000, $opacity));
-}
 
 .blur-bg {
   &-light {

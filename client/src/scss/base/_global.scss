@@ -1,0 +1,55 @@
+@use "sass:string";
+@use "@/scss/abstracts/variables";
+.fullscreen {
+  height: 100vh;
+  width: 100vw;
+  position: absolute;
+  inset: 0;
+}
+
+@each $display in variables.$displays {
+  .d-#{$display} {
+    display: $display;
+  }
+}
+
+// flex-direction
+@each $value in variables.$flex-direction-values {
+  .flex-#{$value} {
+    flex-direction: $value;
+  }
+}
+
+// justify-content
+@each $value in variables.$justify-content-values {
+  $name: $value;
+
+  @if $name != start and $name != center {
+    // removes "space-" from "space-between", around, evenly etc...
+    $name: str-slice($name, 6);
+  }
+  .justify-content-#{$name} {
+    justify-content: $value;
+  }
+}
+
+// align-items
+@each $value in variables.$align-items-values {
+  .align-items-#{$value} {
+    align-items: $value;
+  }
+}
+
+// vertical-align
+@each $value in variables.$vertical-align-values {
+  .align-#{$value} {
+    vertical-align: $value;
+  }
+}
+
+// text-align
+@each $value in variables.$text-align-values {
+  .text-#{$value} {
+    text-align: $value;
+  }
+}

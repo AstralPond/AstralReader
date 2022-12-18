@@ -1,6 +1,11 @@
 @use "sass:list";
 @use "@/scss/abstracts/functions";
 @use "@/scss/abstracts/variables";
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+body {
+  font-family: 'Poppins', sans-serif;
+}
 
 .link {
   color: functions.get-color("alias", "grayscale", "header");
@@ -115,13 +120,13 @@ $sizes: "huge", "large", "medium", "small", "x-small";
 $screens: "desktop", "mobile";
 $font-types: "display", "text";
 
-@function get-letter-spacing($screen, $size) {
-  @if $screen == "desktop" {
-    @return 0.1rem;
+@function get-letter-spacing($font-type, $size) {
+  @if $font-type == "text" {
+    @return 0.075rem;
   } @else if $size == "x-small" {
     @return 0.025rem;
   } @else {
-    @return 0.075rem;
+    @return 0.1rem;
   }
 }
 
@@ -143,7 +148,7 @@ $font-types: "display", "text";
         &-#{$font-type} {
           &-#{$size} {
             font-weight: 400;
-            letter-spacing: get-letter-spacing($screen, $size);
+            letter-spacing: get-letter-spacing($font-type, $size);
             font-size: functions.map-deep-get(
               $styles,
               $screen,
