@@ -1,0 +1,68 @@
+@use "sass:string";
+@use "sass:list";
+
+$spaces: (
+  // 1
+  0.2rem,
+  // 2
+  0.4rem,
+  // 3
+  0.8rem,
+  // 4
+  1.2rem,
+  // 5
+  1.6rem,
+  // 6
+  2rem,
+  // 7
+  2.4rem,
+  // 8
+  3.2rem,
+  // 9
+  3.6rem,
+  // 10
+  4.8rem,
+  // 11
+  6.4rem,
+  // 12
+  8rem,
+  // 13
+  16rem
+);
+
+$directions: top, right, bottom, left;
+@for $i from 1 through length($spaces) {
+  @each $direction in $directions {
+    $first-letter: str-slice($direction, 1, 1);
+    .m#{$first-letter}-#{$i} {
+      margin-#{$direction}: nth($spaces, $i);
+    }
+
+    .p#{$first-letter}-#{$i} {
+      padding-#{$direction}: nth($spaces, $i);
+    }
+
+    @if $direction == top or $direction == bottom {
+      .my-#{$i} {
+        margin-top: nth($spaces, $i);
+        margin-bottom: nth($spaces, $i);
+      }
+
+      .py-#{$i} {
+        padding-top: nth($spaces, $i);
+        padding-bottom: nth($spaces, $i);
+      }
+    } @else {
+      .mx-#{$i} {
+        margin-left: nth($spaces, $i);
+        margin-right: nth($spaces, $i);
+      }
+
+      .px-#{$i} {
+        padding-left: nth($spaces, $i);
+        padding-right: nth($spaces, $i);
+      }
+
+    }
+  }
+}

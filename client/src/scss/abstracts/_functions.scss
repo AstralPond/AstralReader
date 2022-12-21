@@ -1,4 +1,6 @@
 @use "@/scss/abstracts/variables";
+@use "@/scss/base/space";
+
 @function map-deep-get($map, $keys...) {
   @each $key in $keys {
     $map: map-get($map, $key);
@@ -8,6 +10,10 @@
 
 @function get-color($keys...) {
   @return map-deep-get(variables.$colors, $keys...);
+}
+
+@function get-space($index) {
+  @return nth(space.$spaces, $index);
 }
 
 @function toRgb($color) {
