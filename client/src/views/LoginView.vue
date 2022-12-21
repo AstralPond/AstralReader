@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import TextInput from "@/components/inputs/TextInput.vue";
 import { useStore } from "@/stores/main";
 import useAuth from "@/use/auth";
 import { reactive } from "vue";
@@ -31,25 +32,32 @@ function submit() {
         alt="space graphic"
       />
       <div class="box d-inline-block align-middle">
-        <h2 class="desktop-display-x-small text-center">Log In</h2>
+        <h2 class="desktop-display-x-small text-center mb-9">Log In</h2>
         <form
           class="d-flex flex-column"
           @submit.prevent="submit"
           v-on:keyup.enter="submit"
         >
-          <div class="email d-flex flex-column">
-            <label class="desktop-text-small" for="email">email</label>
-            <input
-              id="email"
-              class="desktop-text-small"
-              type="email"
-              v-model="form.email"
-            />
-          </div>
-          <div class="password d-flex flex-column">
-            <label for="password desktop-text-small">password</label>
-            <input id="password" type="password" v-model="form.password" />
-          </div>
+          <TextInput
+            name="email"
+            v-model:value="form.email"
+            type="underlined"
+            size="medium"
+            inputType="text"
+            :showIcon="false"
+            :darkMode="true"
+            label="email"
+          />
+          <TextInput
+            name="password"
+            v-model:value="form.password"
+            type="underlined"
+            size="medium"
+            inputType="password"
+            :show-icon="false"
+            :dark-mode="true"
+            label="password"
+          />
           <a @click.prevent="submit" class="btn">Log In</a>
         </form>
       </div>
@@ -96,7 +104,7 @@ function submit() {
   }
 
   .box {
-    background-color: functions.get-color("alias", "grayscale", "header-weak");
+    background-color: functions.get-color("alias", "grayscale", "header");
     padding: 12rem 25rem;
     @include mixins.elevation(10);
   }
