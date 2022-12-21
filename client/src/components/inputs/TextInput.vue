@@ -88,7 +88,7 @@ const inputClassObj = computed(() => ({
     class="d-flex align-items-center pl-6 pos-relative transition"
     :class="divClassObj"
   >
-    <div class="d-flex">
+    <div class="d-flex" v-if="props.showIcon">
       <InputPlaceholderIcon />
     </div>
     <div>
