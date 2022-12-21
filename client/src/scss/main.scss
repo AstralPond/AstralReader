@@ -1,10 +1,11 @@
-@use 'abstracts/_functions.scss';
-@use 'abstracts/mixins';
-@use 'abstracts/variables';
+@use "abstracts/_functions.scss";
+@use "abstracts/mixins";
+@use "abstracts/variables";
 
-@use 'base/depth';
-@use 'base/global';
-@use 'base/gradients';
-@use 'base/reset';
-@use 'base/typography';
-
+@use "base/depth";
+@use "base/effects";
+@use "base/global";
+@use "base/gradients";
+@use "base/reset";
+@use "base/space";
+@use "base/typography";
