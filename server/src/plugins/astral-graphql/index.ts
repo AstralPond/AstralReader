@@ -1,14 +1,14 @@
+import { Folder } from "@/db/collections/Libraries";
+import { PUBLIC_DIRECTORY } from "@/index";
+import { symlinkDir, unlink } from "@/libs";
 import { CustomDb } from "@plugins/db";
 import bcrypt from "bcrypt";
 import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import fp from "fastify-plugin";
+import fs from "fs";
 import mercurius, { IResolvers, MercuriusOptions } from "mercurius";
 import mercuriusCodegen, { gql } from "mercurius-codegen";
-import fs from "fs";
 import path from "path";
-import { PUBLIC_DIRECTORY } from "@/index";
-import { symlinkDir, unlink } from "@/libs";
-import { Folder } from "@/db/collections/Libraries";
 
 interface FastifyDbInstance extends FastifyInstance {
   db: CustomDb;

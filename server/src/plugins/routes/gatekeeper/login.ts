@@ -9,6 +9,10 @@ export default async function (app: FastifyInstance) {
       password?: string;
     }
     const { email, password } = request.body as LoginBody;
+    if (!email || !password) {
+      return reply.code(401).send("Email or password incorrect.")
+    }
+
     const query = gql`
       mutation Login($email: String!, $password: String!) {
         login(email: $email, password: $password) {
