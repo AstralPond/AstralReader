@@ -1,6 +1,6 @@
-import { type State, useStore } from "@/stores/main";
-import { type Store, storeToRefs } from "pinia";
-import { type Router, useRouter } from "vue-router";
+import { useStore, type State } from "@/stores/main";
+import { storeToRefs, type Store } from "pinia";
+import { useRouter, type Router } from "vue-router";
 
 /**
  * Checks with server if cookie authentication is valid, then updates
@@ -49,14 +49,16 @@ function login(store: Store, router: Router) {
         body: JSON.stringify(body),
       });
 
-      const data = await response.json();
+      if (response.status === 200) {
+        const data = await response.json();
 
-      if (data.email) {
-        store.$patch((state: State) => {
-          state.auth.user = data;
-        });
+        if (data.email) {
+          store.$patch((state: State) => {
+            state.auth.user = data;
+          });
 
-        router.push({ name: "dashboard" });
+          router.push({ name: "dashboard" });
+        }
       }
     } catch (err) {
       console.log(err);
@@ -72,11 +74,17 @@ async function loadCookie(store: Store) {
     credentials: "include",
   });
 
-  const data = await response.json();
+  if (response.status === 200) {
+    const data = await response.json();
 
-  if (data.email) {
+    if (data.email) {
+      store.$patch((state: State) => {
+        state.auth.user = data;
+      });
+    }
+  } else {
     store.$patch((state: State) => {
-      state.auth.user = data;
+      state.auth.user = null;
     });
   }
 }
