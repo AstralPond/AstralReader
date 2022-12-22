@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import Button from "@/components/Button.vue";
 import TextInput from "@/components/inputs/TextInput.vue";
 import { useStore } from "@/stores/main";
 import useAuth from "@/use/auth";
@@ -58,7 +59,14 @@ function submit() {
             :dark-mode="true"
             label="password"
           />
-          <a @click.prevent="submit" class="btn">Log In</a>
+          <Button
+            type="primary"
+            size="small"
+            :darkMode="true"
+            :showIcon="false"
+            >Log In</Button
+          >
+          <!-- <button class="btn">Log In</button> -->
         </form>
       </div>
     </div>

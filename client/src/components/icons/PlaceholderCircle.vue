@@ -1,3 +1,4 @@
+<script lang="ts" setup></script>
 <template>
   <svg
     width="24"
@@ -8,7 +9,6 @@
   >
     <path
       d="M23 12C23 18.0751 18.0751 23 12 23C5.92487 23 1 18.0751 1 12C1 5.92487 5.92487 1 12 1C18.0751 1 23 5.92487 23 12Z"
-      stroke="#A0A3BD"
       stroke-width="2"
     />
   </svg>

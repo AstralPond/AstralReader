@@ -1,3 +1,11 @@
+@function toRgb($color) {
+  @return rgb(red($color), green($color), blue($color));
+}
+
+@function toRgba($color, $alpha) {
+  @return rgba(toRgb($color), $alpha);
+}
+
 // Colors
 $colors: (
   "alias": (
@@ -6,7 +14,7 @@ $colors: (
       "header-weak": #262338,
       "body": #4e4b66,
       "label": #6e7191,
-      "placehold": #a0a3bd,
+      "placeholder": #a0a3bd,
       "line": #d9dbe9,
       "input": #eff0f6,
       "bg-weak": #f7f7fc,
@@ -168,6 +176,32 @@ $colors: (
       "600": #008a00,
       "700": #067306,
       "800": #07540a,
+    ),
+    "transparents": (
+      "solids": (
+        "light": (
+          "90": toRgba(#ffffff, 0.9),
+          "80": toRgba(#ffffff, 0.8),
+          "70": toRgba(#ffffff, 0.7),
+          "60": toRgba(#ffffff, 0.6),
+          "50": toRgba(#ffffff, 0.5),
+          "40": toRgba(#ffffff, 0.4),
+          "30": toRgba(#ffffff, 0.3),
+          "20": toRgba(#ffffff, 0.2),
+          "10": toRgba(#ffffff, 0.1),
+        ),
+        "dark": (
+          "90": toRgba(#000000, 0.9),
+          "80": toRgba(#000000, 0.8),
+          "70": toRgba(#000000, 0.7),
+          "60": toRgba(#000000, 0.6),
+          "50": toRgba(#000000, 0.5),
+          "40": toRgba(#000000, 0.4),
+          "30": toRgba(#000000, 0.3),
+          "20": toRgba(#000000, 0.2),
+          "10": toRgba(#000000, 0.1),
+        ),
+      ),
     ),
   ),
 );
