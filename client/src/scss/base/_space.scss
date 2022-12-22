@@ -32,6 +32,18 @@ $spaces: (
 
 $directions: top, right, bottom, left;
 @for $i from 1 through length($spaces) {
+  .gap-#{$i} {
+    gap: nth($spaces, $i);
+  }
+
+  .gap-x-#{$i} {
+    column-gap: nth($spaces, $i);
+  }
+
+  .gap-y-#{$i} {
+    row-gap: nth($spaces, $i);
+  }
+
   @each $direction in $directions {
     $first-letter: str-slice($direction, 1, 1);
     .m#{$first-letter}-#{$i} {
@@ -62,7 +74,6 @@ $directions: top, right, bottom, left;
         padding-left: nth($spaces, $i);
         padding-right: nth($spaces, $i);
       }
-
     }
   }
 }

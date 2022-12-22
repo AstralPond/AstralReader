@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import InputPlaceholderIcon from "@/components/icons/InputPlaceholder.vue";
+import PlaceholderCircle from "@/components/icons/PlaceholderCircle.vue";
 import InputXIcon from "@/components/icons/InputX.vue";
 import { computed, ref, type InputHTMLAttributes, type VNodeRef } from "vue";
 
@@ -89,7 +89,7 @@ const inputClassObj = computed(() => ({
     :class="divClassObj"
   >
     <div class="d-flex" v-if="props.showIcon">
-      <InputPlaceholderIcon />
+      <PlaceholderCircle />
     </div>
     <div>
       <label
