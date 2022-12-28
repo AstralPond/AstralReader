@@ -16,9 +16,13 @@ const router = useRouter();
 // Redirects page to /dashboard or /login based on isAuthenticated
 store.$subscribe(
   (_mutation, state) => {
-    const { isAuthenticated } = state.auth;
-    if (isAuthenticated) {
+    const { isAuthenticated, user } = state.auth;
+    if (user && user.libraries.length < 1) {
+      router.replace({ name: "initialSetup" });
+    } else if (isAuthenticated) {
       router.replace({ name: "dashboard" });
+    } else if (user && user.libraries.length < 1) {
+      router.replace({ name: "initialSetup" });
     } else {
       router.replace({ name: "login" });
     }

@@ -18,6 +18,12 @@ export default async function (app: FastifyInstance) {
         login(email: $email, password: $password) {
           id
           email
+          libraries {
+            name
+            folders {
+              publicPath
+            }
+          }
         }
       }
     `;
@@ -56,8 +62,9 @@ export default async function (app: FastifyInstance) {
           httpOnly: true,
           secure: true,
           signed: true,
+          sameSite: 'none'
         })
-        .send({ email: login.email });
+        .send({ email: login.email, libraries: login.libraries });
     } catch (err) {
       console.log(err);
       return reply.code(500).send("Internal Server Error");

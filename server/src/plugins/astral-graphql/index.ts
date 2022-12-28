@@ -9,6 +9,7 @@ import fs from "fs";
 import mercurius, { IResolvers, MercuriusOptions } from "mercurius";
 import mercuriusCodegen, { gql } from "mercurius-codegen";
 import path from "path";
+import MUUID from "uuid-mongodb";
 
 interface FastifyDbInstance extends FastifyInstance {
   db: CustomDb;
@@ -52,10 +53,12 @@ export const schema = gql`
   type User {
     id: ID!
     email: String!
+    libraries: [Library!]!
   }
 
   type Library {
-    id: ID!
+    _id: ID!
+    userID: ID!
     name: String!
     folders: [Folder!]!
   }
@@ -67,14 +70,14 @@ export const schema = gql`
   }
 
   type Query {
-    user(id: ID!, email: String!): User
+    user(id: ID!, email: String!): User!
   }
 
   type Mutation {
     login(email: String!, password: String!): User
     createUser(email: String!, password: String!): User
-    createLibrary(name: String!): Library
-    deleteLibrary(id: ID!, name: String!): Library
+    createLibrary(libraryName: String!, userID: ID!): Library
+    deleteLibrary(id: ID!, libraryName: String!): Library
     addFolder(
       targetPath: String!
       libraryID: ID!
@@ -91,20 +94,30 @@ export const schema = gql`
 function createResolvers(app: FastifyDbInstance): IResolvers {
   const { db } = app;
   return {
+    User: {
+      // @ts-ignore
+      libraries: async (user) => {
+        return await db.libraries
+          .find({
+            userID: MUUID.from(user.id),
+          })
+          .toArray();
+      },
+    },
     Query: {
       user: async (_parent, args, _context, _info) => {
         const { id, email } = args;
 
-        const foundUser = await app.db.users.findOne({
+        const foundUser = await db.users.findOne({
           email,
         });
 
-        if (!foundUser) return null;
+        if (!foundUser) throw new Error("User not found");
 
         // If the input ID does not match the found user's ID
         if (db.stringify(foundUser._id.buffer) !== id) {
           // TODO: Log this event
-          return null;
+          throw new Error("Invalid arguments");
         }
 
         return { id, email };
@@ -157,6 +170,7 @@ function createResolvers(app: FastifyDbInstance): IResolvers {
           const createdUser = await db.users.insertOne({
             email,
             password: hashedPassword,
+            libraries: []
           });
           const binary = createdUser.insertedId;
           const id = db.stringify(binary.buffer);
@@ -167,14 +181,19 @@ function createResolvers(app: FastifyDbInstance): IResolvers {
         }
       },
       createLibrary: async (_parent, args, _context, _info) => {
-        const { name } = args;
-        const foundLibrary = await db.libraries.findOne({ name });
-        const libraryPath = path.join(PUBLIC_DIRECTORY, name);
+        const { libraryName, userID } = args;
+        const foundUser = await db.users.findOne({ _id: MUUID.from(userID) });
+        const foundLibrary = await db.libraries.findOne({ name: libraryName });
+        const libraryPath = path.join(PUBLIC_DIRECTORY, libraryName);
         const existingLibraryDir = fs.existsSync(libraryPath);
+
+        if (!foundUser) {
+          throw new Error("Invalid user.");
+        }
 
         // Can't create a library if it already exists
         if (foundLibrary) {
-          throw new Error(`Library "${name}" already exists`);
+          throw new Error(`Library "${libraryName}" already exists`);
         }
 
         if (!foundLibrary && existingLibraryDir) {
@@ -188,30 +207,32 @@ function createResolvers(app: FastifyDbInstance): IResolvers {
 
         // Create new library (mongodb)
         const createdLibrary = await db.libraries.insertOne({
-          name,
+          name: libraryName,
+          userID: MUUID.from(userID),
           folders: [],
         });
+
         const binary = createdLibrary.insertedId;
         const id = db.stringify(binary.buffer);
-        return { id, name };
+        return { id, name: libraryName };
       },
       deleteLibrary: async (_parent, args, _context, _info) => {
-        const { id, name } = args;
+        const { id, libraryName } = args;
 
-        const foundLibrary = await db.libraries.findOne({ name });
+        const foundLibrary = await db.libraries.findOne({ name: libraryName });
         if (!foundLibrary) {
-          throw new Error(`Library "${name}" does not exist.`);
+          throw new Error(`Library "${libraryName}" does not exist.`);
         }
 
         if (db.stringify(foundLibrary._id.buffer) !== id) {
           throw new Error(`Incorrect arguments.`);
         }
 
-        fs.rmdirSync(path.join(PUBLIC_DIRECTORY, name), {
+        fs.rmdirSync(path.join(PUBLIC_DIRECTORY, libraryName), {
           recursive: true,
         });
         await db.libraries.deleteOne(foundLibrary);
-        return { id, name };
+        return { id, name: libraryName };
       },
       addFolder: async (_parent, args, _context, _info) => {
         const { targetPath, libraryID, libraryName } = args;
@@ -256,7 +277,7 @@ function createResolvers(app: FastifyDbInstance): IResolvers {
 
         return {
           ...folder,
-          libraryID: foundLibrary._id,
+          libraryID: foundLibrary._id.buffer,
         };
       },
       removeFolder: async (_parent, args, _context, _info) => {

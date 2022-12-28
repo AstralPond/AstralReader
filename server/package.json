@@ -22,7 +22,8 @@
     "jsonwebtoken": "^8.5.1",
     "mercurius-codegen": "^4.0.1",
     "mongodb": "^4.10.0",
-    "uuid": "^9.0.0"
+    "uuid": "^9.0.0",
+    "uuid-mongodb": "^2.5.3"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.0",

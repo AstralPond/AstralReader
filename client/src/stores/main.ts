@@ -1,11 +1,22 @@
 import { defineStore } from "pinia";
 import { computed, reactive } from "vue";
 
-interface User {
+export interface User {
   email: string;
+  libraries: Library[];
 }
 
-interface Auth {
+export interface Library {
+  name: string;
+  folders: Folder[];
+}
+
+export interface Folder {
+  basePath: string;
+  publicPath: string;
+}
+
+export interface Auth {
   user: null | User;
   isAuthenticated: boolean;
 }
