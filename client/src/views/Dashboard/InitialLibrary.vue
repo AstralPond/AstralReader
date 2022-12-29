@@ -7,15 +7,23 @@ import { useMutation } from "villus";
 import { computed, reactive, ref, watch } from "vue";
 
 const { auth, refetchUserData } = useAuth();
+// Used to store value for library name text input
 const libraryName = ref("");
+// Used to change tabs on the side of the smaller (initial) modal
 const activeTabIndex = ref(0);
+// Tabs to be used on the side of the smaller modal
 const tabs = ["Library Name", "Folders"];
+// Used for conditionally rendering the larger modal
 const showFolderInputModal = ref(false);
-const selectedFolder = reactive([]);
+// array of directory names from updateDirTree function
+const dirStack = ref<string[]>([]);
+// pushes/pops directories into here based on what the user selects
+const selectedFolder = reactive<string[]>([]);
+// convert array of selected folders to human readable path
 const folderPath = computed(() => {
   return "/" + selectedFolder.join("/");
 });
-const dirStack = ref([]);
+
 const CreateLibrary = `
   mutation CreateLibraryWithFolder ($email: String!, $libraryName: String!, $targetPath: String!) {
     createLibraryWithFolder(email: $email, libraryName: $libraryName, targetPath: $targetPath) {
@@ -23,7 +31,7 @@ const CreateLibrary = `
     }
   }
 `;
-const { data, error, isFetching, execute } = useMutation(CreateLibrary);
+const { execute } = useMutation(CreateLibrary);
 async function updateDirTree() {
   const response = await fetch("http://localhost:3000/dir-autocompletion", {
     headers: {
@@ -32,7 +40,7 @@ async function updateDirTree() {
     method: "POST",
     body: JSON.stringify({ input: folderPath.value }),
   });
-  const data = await response.json();
+  const data: string[] = await response.json();
   dirStack.value = data;
 }
 
@@ -70,10 +78,13 @@ watch(selectedFolder, () => {
 <template>
   <div
     v-show="showFolderInputModal"
-    class="fullscreen modal-container"
+    class="fullscreen modal-container bg-alias-grayscale-body"
     @click.self="showFolderInputModal = false"
   >
-    <div id="folder-input-modal" class="modal d-flex">
+    <div
+      id="folder-input-modal"
+      class="modal pos-relative d-flex pos-absolute transform-center elevate-3 bg-alias-grayscale-header-weak overflow-hidden"
+    >
       <div class="left-panel desktop-text-large overflow-y-scroll">
         <ul>
           <li @click="goOutOneDir">.. [Back]</li>
@@ -84,13 +95,14 @@ watch(selectedFolder, () => {
           >
             {{ dir }}
           </li>
+          <li v-show="dirStack.length > 0" @click="goOutOneDir">.. [Back]</li>
         </ul>
       </div>
       <div
         class="main-panel d-flex justify-content-center align-items-center justify-content-around"
       >
         <Button
-          class="action-btn"
+          class="pos-absolute bottom-8 right-8"
           size="medium"
           type="primary"
           @click="showFolderInputModal = false"
@@ -102,9 +114,11 @@ watch(selectedFolder, () => {
   </div>
 
   <div
-    class="fullscreen text-center d-flex justify-content-center flex-column align-items-center"
+    class="fullscreen bg-alias-grayscale-body text-center d-flex justify-content-center flex-column align-items-center"
   >
-    <h2 class="d-flex align-items-center flex-column">
+    <h2
+      class="d-flex align-items-center flex-column pos-absolute left-10 top-10"
+    >
       <LogoIcon />
       <span class="desktop-display-x-small fw-3 font-poppins mt-2"
         >Astral Reader</span
@@ -112,8 +126,10 @@ watch(selectedFolder, () => {
     </h2>
 
     <h1 class="desktop-display-huge mb-8">Create Your First Library</h1>
-    <div class="modal d-flex">
-      <div class="left-panel desktop-link-x-small">
+    <div
+      class="modal d-flex pos-relative bg-alias-grayscale-header-weak overflow-hidden"
+    >
+      <div class="bg-alias-grayscale-header left-panel desktop-link-x-small">
         <ul>
           <li
             :key="tab"
@@ -158,9 +174,12 @@ watch(selectedFolder, () => {
           darkMode
           >Browse...</Button
         >
-        <Button class="action-btn" size="small" type="primary">{{
-          activeTabIndex < tabs.length - 1 ? "Next" : "Finish"
-        }}</Button>
+        <Button
+          class="pos-absolute right-8 bottom-8"
+          size="small"
+          type="primary"
+          >{{ activeTabIndex < tabs.length - 1 ? "Next" : "Finish" }}</Button
+        >
       </form>
     </div>
   </div>
@@ -168,14 +187,9 @@ watch(selectedFolder, () => {
 
 <style scoped lang="scss">
 @use "@/scss/abstracts/functions";
-@use "@/scss/abstracts/mixins";
 
 .left-panel {
-  background-color: functions.get-color("alias", "grayscale", "header");
   width: 25%;
-  ul {
-    list-style: none;
-  }
 }
 
 .main-panel {
@@ -183,35 +197,19 @@ watch(selectedFolder, () => {
 }
 
 .modal {
-  position: relative;
   border-radius: 1.6rem 0 0 1.6rem;
   height: 40rem;
   width: 70rem;
-  background-color: functions.get-color("alias", "grayscale", "header-weak");
-  overflow: hidden;
   border-top: 3rem solid functions.get-color("alias", "primary", "weak");
-  @include mixins.elevation(3);
 }
 
 #folder-input-modal {
   height: 80%;
   width: 80%;
-  z-index: 999;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
 }
 
 div.fullscreen {
-  background-color: functions.get-color("alias", "grayscale", "body");
   color: #ffffff;
-
-  h2 {
-    position: absolute;
-    left: 5rem;
-    top: 5rem;
-  }
 
   li {
     transition-property: background;
@@ -229,12 +227,6 @@ div.fullscreen {
 
   li.active {
     background-color: functions.get-color("alias", "grayscale", "header-weak");
-  }
-
-  .action-btn {
-    position: absolute;
-    bottom: 3rem;
-    right: 3rem;
   }
 }
 

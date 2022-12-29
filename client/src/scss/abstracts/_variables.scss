@@ -206,6 +206,34 @@ $colors: (
   ),
 );
 
+@each $iKey, $iValue in $colors {
+  @each $jKey, $jValue in $iValue {
+    @each $kKey, $kValue in $jValue {
+      @if $kKey == "solids" {
+        @each $lKey, $lValue in $kValue {
+          @each $mKey, $mValue in $lKey {
+            .#{$iKey}-#{$jKey}-#{$kKey}-#{$lKey}-#{$mKey} {
+              color: $mValue;
+            }
+
+            .bg-#{$iKey}-#{$jKey}-#{$kKey}-#{$lKey}-#{$mKey} {
+              background-color: $mValue;
+            }
+          }
+        }
+      } @else {
+        .#{$iKey}-#{$jKey}-#{$kKey} {
+          color: $kValue;
+        }
+
+        .bg-#{$iKey}-#{$jKey}-#{$kKey} {
+          background-color: $kValue;
+        }
+      }
+    }
+  }
+}
+
 // display
 $displays: block, inline-block, none, flex, grid;
 

@@ -105,7 +105,7 @@ function createResolvers(app: FastifyDbInstance): IResolvers {
 
         result.forEach((library) => {
           // @ts-ignore
-          library.id = library._id;
+          library.id = db.stringify(library._id);
           // @ts-ignore
           delete library._id;
         });
@@ -141,9 +141,12 @@ function createResolvers(app: FastifyDbInstance): IResolvers {
             throw new Error("Email or password incorrect");
           }
 
-          const match = await bcrypt.compare(password, foundUser.password);
+          const passwordMatched = await bcrypt.compare(
+            password,
+            foundUser.password
+          );
 
-          if (match) {
+          if (passwordMatched) {
             const { _id, email } = foundUser;
             const id = db.stringify(_id.buffer);
 
@@ -153,8 +156,7 @@ function createResolvers(app: FastifyDbInstance): IResolvers {
             };
           }
         } catch (e) {
-          // throw new Error((e as Error)?.message || "Internal Server Error");
-          throw new Error("Email or password incorrect");
+          throw new Error(JSON.stringify(e));
         }
 
         throw new Error("Email or password incorrect");
@@ -165,6 +167,7 @@ function createResolvers(app: FastifyDbInstance): IResolvers {
 
           const foundUser = await db.users.findOne({ email });
 
+          // Don't create user if user with given email already exists
           if (foundUser) {
             throw new Error("User already exists.");
           }
@@ -185,7 +188,7 @@ function createResolvers(app: FastifyDbInstance): IResolvers {
 
           return { id, email };
         } catch (err) {
-          throw new Error((err as Error)?.message || "Internal Server Error");
+          throw new Error(JSON.stringify(err));
         }
       },
       createLibrary: async (_parent, args, _context, _info) => {
@@ -206,7 +209,7 @@ function createResolvers(app: FastifyDbInstance): IResolvers {
 
         if (!foundLibrary && existingLibraryDir) {
           throw new Error(
-            `${libraryPath} already exists, this shouldn't happen. Please delete it.`
+            `${libraryPath} already exists in the 'public' directory, this shouldn't happen. Please delete it.`
           );
         }
 
@@ -319,13 +322,6 @@ function createResolvers(app: FastifyDbInstance): IResolvers {
 
         await db.libraries.updateOne(
           { _id: foundLibrary._id },
-          // const Folder = {
-          //   ...,
-          //   folders: [
-          //     ...,
-          //     { path: targetPath } // addToSet appends here
-          //   ]
-          // }
           { $push: { folders: folder } }
         );
 

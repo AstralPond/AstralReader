@@ -5,12 +5,3 @@
   padding-left: $value;
   padding-right: $value;
 }
-
-// $level is a number from 1-10
-@mixin elevation($level) {
-  $values: nth(depth.$elevations, $level);
-  $y: map-get($values, "y");
-  $blur: map-get($values, "blur");
-  $opacity: map-get($values, "opacity");
-  filter: drop-shadow(0 $y $blur functions.toRgba(#000000, $opacity));
-}

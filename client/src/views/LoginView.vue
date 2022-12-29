@@ -24,16 +24,23 @@ function submit() {
 <template>
   <div
     id="login-view"
-    class="fullscreen d-flex align-items-center align-middle justify-content-center gradient-34"
+    class="alias-grayscale-bg fullscreen d-flex align-items-center align-middle justify-content-center gradient-34"
   >
     <div class="login">
       <img
-        class="d-inline-block align-middle"
+        class="d-inline-block align-middle elevate-10"
         src="@/assets/login-image.jpg"
         alt="space graphic"
       />
-      <div class="box d-inline-block align-middle">
-        <h2 class="desktop-display-x-small text-center mb-9">Log In</h2>
+      <div
+        id="box"
+        class="bg-alias-grayscale-header d-inline-block align-middle elevate-10"
+      >
+        <h2
+          class="alias-grayscale-input desktop-display-x-small text-center mb-9"
+        >
+          Log In
+        </h2>
         <form
           class="d-flex flex-column gap-y-8"
           @submit.prevent="submit"
@@ -70,26 +77,7 @@ function submit() {
 </template>
 
 <style lang="scss" scoped>
-@use "@/scss/abstracts/functions";
-@use "@/scss/abstracts/mixins";
-#login-view {
-  color: functions.get-color("alias", "grayscale", "bg");
-
-  img {
-    @include mixins.elevation(10);
-  }
-  label {
-    @include mixins.padding-x(2rem);
-  }
-
-  h2 {
-    color: functions.get-color("alias", "grayscale", "input");
-  }
-
-  .box {
-    background-color: functions.get-color("alias", "grayscale", "header");
-    padding: 12rem 25rem;
-    @include mixins.elevation(10);
-  }
+#box {
+  padding: 12rem 25rem;
 }
 </style>

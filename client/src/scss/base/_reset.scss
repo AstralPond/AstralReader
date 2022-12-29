@@ -13,6 +13,11 @@ body {
   font-size: 1.6rem;
 }
 
-button, a {
+button,
+a {
   cursor: pointer;
+}
+
+ul {
+  list-style: none;
 }

@@ -46,6 +46,11 @@ $directions: top, right, bottom, left;
 
   @each $direction in $directions {
     $first-letter: str-slice($direction, 1, 1);
+
+    .#{$direction}-#{$i} {
+      #{$direction}: nth($spaces, $i);
+    }
+
     .m#{$first-letter}-#{$i} {
       margin-#{$direction}: nth($spaces, $i);
     }
