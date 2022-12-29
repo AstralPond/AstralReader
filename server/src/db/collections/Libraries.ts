@@ -3,6 +3,7 @@ import { Binary } from "mongodb";
 
 export interface Library {
   _id?: Binary;
+  userID: Binary;
   name: string;
   folders: Folder[];
 }

@@ -6,11 +6,16 @@
 
 <script setup lang="ts">
 import { useStore } from "@/stores/main";
+import { useClient } from "villus";
 import { useRouter } from "vue-router";
 import "./scss/main.scss";
 
 const store = useStore();
 const router = useRouter();
+
+useClient({
+  url: "http://localhost:3000/graphql",
+});
 
 // Runs everytime state is changed
 // Redirects page to /dashboard or /login based on isAuthenticated

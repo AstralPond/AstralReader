@@ -35,7 +35,7 @@ function submit() {
       <div class="box d-inline-block align-middle">
         <h2 class="desktop-display-x-small text-center mb-9">Log In</h2>
         <form
-          class="d-flex flex-column"
+          class="d-flex flex-column gap-y-8"
           @submit.prevent="submit"
           v-on:keyup.enter="submit"
         >
@@ -59,11 +59,7 @@ function submit() {
             :dark-mode="true"
             label="password"
           />
-          <Button
-            type="primary"
-            size="small"
-            :darkMode="true"
-            :showIcon="false"
+          <Button type="primary" size="small" :darkMode="true" :showIcon="false"
             >Log In</Button
           >
           <!-- <button class="btn">Log In</button> -->
@@ -82,33 +78,12 @@ function submit() {
   img {
     @include mixins.elevation(10);
   }
-  input {
-    color: functions.get-color("alias", "grayscale", "bg");
-    @include mixins.padding-x(2rem);
-    border: none;
-    background: none;
-    border-bottom: 0.2rem solid
-      functions.get-color("alias", "grayscale", "body");
-    transition-property: border-color;
-    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-    transition-duration: 150ms;
-    &:focus {
-      outline: none;
-      border-bottom: 0.2rem solid
-        functions.get-color("alias", "grayscale", "bg");
-    }
-  }
   label {
     @include mixins.padding-x(2rem);
   }
 
   h2 {
     color: functions.get-color("alias", "grayscale", "input");
-  }
-
-  form {
-    // TODO: use spacer variables
-    gap: 3rem;
   }
 
   .box {

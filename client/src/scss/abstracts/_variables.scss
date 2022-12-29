@@ -231,3 +231,5 @@ $text-align-values: (start, end, center, justify);
 
 // position
 $position-values: (static, relative, absolute, fixed, sticky);
+
+$overflow-values: auto, hidden, clip, visible, scroll;

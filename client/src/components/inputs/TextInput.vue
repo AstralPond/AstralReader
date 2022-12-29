@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import PlaceholderCircle from "@/components/icons/PlaceholderCircle.vue";
 import InputXIcon from "@/components/icons/InputX.vue";
+import PlaceholderCircle from "@/components/icons/PlaceholderCircle.vue";
 import { computed, ref, type InputHTMLAttributes, type VNodeRef } from "vue";
 
 export type Type = "underlined" | "default";
@@ -12,6 +12,7 @@ export interface Props {
   inputType?: InputHTMLAttributes["type"];
   showIcon?: boolean;
   darkMode?: boolean;
+  disabled?: boolean;
   value: string;
   label: string;
   name: string;
@@ -23,10 +24,12 @@ const props = withDefaults(defineProps<Props>(), {
   inputType: "text",
   showIcon: false,
   darkMode: true,
+  disabled: false,
 });
 
 const emit = defineEmits<{
   (event: "update:value", value: string): void;
+  (event: "click"): void;
 }>();
 
 const isFocused = ref(false);
@@ -34,6 +37,7 @@ const isMouseOverIcon = ref(false);
 const inputRef = ref<null | VNodeRef>(null);
 
 function handleOnDivClick() {
+  emit("click");
   inputRef.value.focus();
 }
 
@@ -101,6 +105,7 @@ const inputClassObj = computed(() => ({
       <input
         :id="props.name"
         ref="inputRef"
+        :disabled="props.disabled"
         class="desktop-text-small px-6 pos-absolute transition"
         :class="inputClassObj"
         :type="props.inputType"
@@ -108,6 +113,7 @@ const inputClassObj = computed(() => ({
         @input="emit('update:value', ($event.target as HTMLInputElement).value)"
         @focus="isFocused = true"
         @blur="isFocused = false"
+        @click="emit('click')"
       />
       <InputXIcon
         class="x-icon pos-absolute z-10 transition"
@@ -182,7 +188,7 @@ div#container {
 
     input {
       color: functions.get-color("alias", "grayscale", "bg");
-      background: functions.get-color("alias", "grayscale", "header");
+      background: transparent;
     }
   }
 

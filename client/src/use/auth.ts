@@ -1,6 +1,6 @@
-import { useStore, type State } from "@/stores/main";
-import { storeToRefs, type Store } from "pinia";
-import { useRouter, type Router } from "vue-router";
+import {useStore, type State} from "@/stores/main";
+import {storeToRefs, type Store} from "pinia";
+import {useRouter, type Router} from "vue-router";
 
 /**
  * Checks with server if cookie authentication is valid, then updates
@@ -22,13 +22,13 @@ import { useRouter, type Router } from "vue-router";
  * </script>
  *
  */
-export default function useAuth(s: Store<"main", State>, r: Router) {
+export default function useAuth(s?: Store<"main", State>, r?: Router) {
   const store = s || useStore();
   const router = r || useRouter();
   const { auth } = storeToRefs(store);
   loadCookie(store);
 
-  return { auth, login: login(store, router) };
+  return { auth, login: login(store, router), refetchUserData: () => loadCookie(store) };
 }
 
 interface LoginBody {
@@ -68,6 +68,7 @@ function login(store: Store, router: Router) {
   };
 }
 
+// Loads cookie stored on browser and updates user data
 async function loadCookie(store: Store) {
   // Update auth store
   const response = await fetch("http://localhost:3000/gatekeeper", {

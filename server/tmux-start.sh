@@ -14,6 +14,6 @@ tmux send-keys -t $session:$window 'nvim .' C-m
 
 window=2
 tmux new-window -t $session:$window -n 'mongodb'
-tmux send-keys -t $session:$window 'docker-compose up --build ' C-m
+tmux send-keys -t $session:$window 'docker-compose up' C-m
 
 tmux attach-session -t $session

@@ -4,12 +4,10 @@ import jwt from "jsonwebtoken";
 import { gql } from "mercurius-codegen";
 
 interface Payload {
-  data: User;
-}
-
-interface User {
-  id: string;
-  email: string;
+  data: {
+    id: string;
+    email: string;
+  };
 }
 
 export default function routes(app: FastifyInstance) {
@@ -40,6 +38,12 @@ export default function routes(app: FastifyInstance) {
           user(id: $id, email: $email) {
             id
             email
+            libraries {
+              name
+              folders {
+                publicPath
+              }
+            }
           }
         }
       `;
@@ -76,7 +80,7 @@ export default function routes(app: FastifyInstance) {
           secure: true,
           signed: true,
         })
-        .send({ email: user.email });
+        .send({ email: user.email, libraries: user.libraries });
     } catch (err) {
       return reply.code(500).send(err);
     }

@@ -9,6 +9,7 @@ import fs from "fs";
 import mercurius, { IResolvers, MercuriusOptions } from "mercurius";
 import mercuriusCodegen, { gql } from "mercurius-codegen";
 import path from "path";
+import MUUID from "uuid-mongodb";
 
 interface FastifyDbInstance extends FastifyInstance {
   db: CustomDb;
@@ -52,34 +53,36 @@ export const schema = gql`
   type User {
     id: ID!
     email: String!
+    libraries: [Library!]!
   }
 
   type Library {
     id: ID!
+    userID: ID!
     name: String!
     folders: [Folder!]!
   }
 
   type Folder {
-    libraryID: ID!
     basePath: String!
     publicPath: String!
   }
 
   type Query {
-    user(id: ID!, email: String!): User
+    user(id: ID!, email: String!): User!
   }
 
   type Mutation {
     login(email: String!, password: String!): User
     createUser(email: String!, password: String!): User
-    createLibrary(name: String!): Library
-    deleteLibrary(id: ID!, name: String!): Library
-    addFolder(
-      targetPath: String!
-      libraryID: ID!
+    createLibraryWithFolder(
       libraryName: String!
-    ): Folder!
+      email: String!
+      targetPath: String!
+    ): Library
+    createLibrary(libraryName: String!, email: String!): Library
+    deleteLibrary(id: ID!, libraryName: String!): Library
+    addFolder(targetPath: String!, libraryName: String!): Folder!
     removeFolder(
       publicPath: String!
       libraryID: ID!
@@ -91,20 +94,38 @@ export const schema = gql`
 function createResolvers(app: FastifyDbInstance): IResolvers {
   const { db } = app;
   return {
+    User: {
+      // @ts-ignore
+      libraries: async (user) => {
+        const result = await db.libraries
+          .find({
+            userID: MUUID.from(user.id),
+          })
+          .toArray();
+
+        result.forEach((library) => {
+          // @ts-ignore
+          library.id = library._id;
+          // @ts-ignore
+          delete library._id;
+        });
+        return result;
+      },
+    },
     Query: {
       user: async (_parent, args, _context, _info) => {
         const { id, email } = args;
 
-        const foundUser = await app.db.users.findOne({
+        const foundUser = await db.users.findOne({
           email,
         });
 
-        if (!foundUser) return null;
+        if (!foundUser) throw new Error("User not found");
 
         // If the input ID does not match the found user's ID
         if (db.stringify(foundUser._id.buffer) !== id) {
           // TODO: Log this event
-          return null;
+          throw new Error("Invalid arguments");
         }
 
         return { id, email };
@@ -157,6 +178,7 @@ function createResolvers(app: FastifyDbInstance): IResolvers {
           const createdUser = await db.users.insertOne({
             email,
             password: hashedPassword,
+            libraries: [],
           });
           const binary = createdUser.insertedId;
           const id = db.stringify(binary.buffer);
@@ -167,14 +189,19 @@ function createResolvers(app: FastifyDbInstance): IResolvers {
         }
       },
       createLibrary: async (_parent, args, _context, _info) => {
-        const { name } = args;
-        const foundLibrary = await db.libraries.findOne({ name });
-        const libraryPath = path.join(PUBLIC_DIRECTORY, name);
+        const { libraryName, email } = args;
+        const foundUser = await db.users.findOne({ email });
+        const foundLibrary = await db.libraries.findOne({ name: libraryName });
+        const libraryPath = path.join(PUBLIC_DIRECTORY, libraryName);
         const existingLibraryDir = fs.existsSync(libraryPath);
+
+        if (!foundUser) {
+          throw new Error("Invalid user.");
+        }
 
         // Can't create a library if it already exists
         if (foundLibrary) {
-          throw new Error(`Library "${name}" already exists`);
+          throw new Error(`Library "${libraryName}" already exists`);
         }
 
         if (!foundLibrary && existingLibraryDir) {
@@ -188,40 +215,94 @@ function createResolvers(app: FastifyDbInstance): IResolvers {
 
         // Create new library (mongodb)
         const createdLibrary = await db.libraries.insertOne({
-          name,
+          name: libraryName,
+          userID: foundUser._id,
           folders: [],
         });
-        const binary = createdLibrary.insertedId;
-        const id = db.stringify(binary.buffer);
-        return { id, name };
+
+        const id = db.stringify(createdLibrary.insertedId.buffer);
+
+        return { id, name: libraryName };
+      },
+      createLibraryWithFolder: async (_parent, args, _context, _info) => {
+        const { libraryName, email, targetPath } = args;
+        const foundUser = await db.users.findOne({ email });
+        const foundLibrary = await db.libraries.findOne({ name: libraryName });
+        const libraryPath = path.join(PUBLIC_DIRECTORY, libraryName);
+        const existingLibraryDir = fs.existsSync(libraryPath);
+        const directoryName = path.basename(targetPath);
+
+        if (!foundUser) {
+          throw new Error("Invalid user.");
+        }
+
+        // Can't create a library if it already exists
+        if (foundLibrary) {
+          throw new Error(`Library "${libraryName}" already exists`);
+        }
+
+        if (!foundLibrary && existingLibraryDir) {
+          throw new Error(
+            `${libraryPath} already exists, this shouldn't happen. Please delete it.`
+          );
+        }
+
+        // Creaate new library (directory)
+        fs.mkdirSync(libraryPath);
+
+        // Create new library (mongodb)
+        const publicPath = path.join(
+          PUBLIC_DIRECTORY,
+          libraryName,
+          directoryName
+        );
+
+        const folder: Folder = {
+          basePath: targetPath,
+          publicPath: publicPath,
+        };
+
+        const createdLibrary = await db.libraries.insertOne({
+          name: libraryName,
+          userID: foundUser._id,
+          folders: [folder],
+        });
+
+        try {
+          await symlinkDir(targetPath, libraryName);
+        } catch (err) {
+          throw new Error(JSON.stringify(err));
+        }
+        return {
+          id: db.stringify(createdLibrary.insertedId.buffer),
+          userID: db.stringify(foundUser._id.buffer),
+          name: libraryName,
+          folders: [folder],
+        };
       },
       deleteLibrary: async (_parent, args, _context, _info) => {
-        const { id, name } = args;
+        const { id, libraryName } = args;
 
-        const foundLibrary = await db.libraries.findOne({ name });
+        const foundLibrary = await db.libraries.findOne({ name: libraryName });
         if (!foundLibrary) {
-          throw new Error(`Library "${name}" does not exist.`);
+          throw new Error(`Library "${libraryName}" does not exist.`);
         }
 
         if (db.stringify(foundLibrary._id.buffer) !== id) {
           throw new Error(`Incorrect arguments.`);
         }
 
-        fs.rmdirSync(path.join(PUBLIC_DIRECTORY, name), {
+        fs.rmdirSync(path.join(PUBLIC_DIRECTORY, libraryName), {
           recursive: true,
         });
         await db.libraries.deleteOne(foundLibrary);
-        return { id, name };
+        return { id, name: libraryName };
       },
       addFolder: async (_parent, args, _context, _info) => {
-        const { targetPath, libraryID, libraryName } = args;
+        const { targetPath, libraryName } = args;
         const foundLibrary = await db.libraries.findOne({ name: libraryName });
         if (!foundLibrary) {
           throw new Error("Invalid library.");
-        }
-
-        if (db.stringify(foundLibrary._id.buffer) !== libraryID) {
-          throw new Error("Invalid arguments.");
         }
 
         const directoryName = path.basename(targetPath);
@@ -254,10 +335,7 @@ function createResolvers(app: FastifyDbInstance): IResolvers {
           throw new Error(JSON.stringify(err));
         }
 
-        return {
-          ...folder,
-          libraryID: foundLibrary._id,
-        };
+        return folder;
       },
       removeFolder: async (_parent, args, _context, _info) => {
         const { publicPath, libraryID, libraryName } = args;
