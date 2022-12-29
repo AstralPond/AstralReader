@@ -1,5 +1,5 @@
-import DashboardView from "@/views/DashboardView.vue";
-import InitialSetupView from "@/views/InitialSetupView.vue";
+import DashboardView from "@/views/Dashboard/index.vue";
+import InitialSetupView from "@/views/Dashboard/InitialLibrary.vue";
 import LoginView from "@/views/LoginView.vue";
 import {
   createRouter,

@@ -60,3 +60,16 @@
     position: $value;
   }
 }
+
+@each $value in variables.$overflow-values {
+  .overflow-#{$value} {
+    overflow: $value;
+  }
+
+  .overflow-y-#{$value} {
+    overflow-y: $value;
+  }
+  .overflow-y-#{$value} {
+    overflow-x: $value;
+  }
+}

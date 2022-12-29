@@ -57,14 +57,13 @@ export const schema = gql`
   }
 
   type Library {
-    _id: ID!
+    id: ID!
     userID: ID!
     name: String!
     folders: [Folder!]!
   }
 
   type Folder {
-    libraryID: ID!
     basePath: String!
     publicPath: String!
   }
@@ -76,13 +75,14 @@ export const schema = gql`
   type Mutation {
     login(email: String!, password: String!): User
     createUser(email: String!, password: String!): User
-    createLibrary(libraryName: String!, userID: ID!): Library
-    deleteLibrary(id: ID!, libraryName: String!): Library
-    addFolder(
-      targetPath: String!
-      libraryID: ID!
+    createLibraryWithFolder(
       libraryName: String!
-    ): Folder!
+      email: String!
+      targetPath: String!
+    ): Library
+    createLibrary(libraryName: String!, email: String!): Library
+    deleteLibrary(id: ID!, libraryName: String!): Library
+    addFolder(targetPath: String!, libraryName: String!): Folder!
     removeFolder(
       publicPath: String!
       libraryID: ID!
@@ -97,11 +97,19 @@ function createResolvers(app: FastifyDbInstance): IResolvers {
     User: {
       // @ts-ignore
       libraries: async (user) => {
-        return await db.libraries
+        const result = await db.libraries
           .find({
             userID: MUUID.from(user.id),
           })
           .toArray();
+
+        result.forEach((library) => {
+          // @ts-ignore
+          library.id = library._id;
+          // @ts-ignore
+          delete library._id;
+        });
+        return result;
       },
     },
     Query: {
@@ -170,7 +178,7 @@ function createResolvers(app: FastifyDbInstance): IResolvers {
           const createdUser = await db.users.insertOne({
             email,
             password: hashedPassword,
-            libraries: []
+            libraries: [],
           });
           const binary = createdUser.insertedId;
           const id = db.stringify(binary.buffer);
@@ -181,8 +189,8 @@ function createResolvers(app: FastifyDbInstance): IResolvers {
         }
       },
       createLibrary: async (_parent, args, _context, _info) => {
-        const { libraryName, userID } = args;
-        const foundUser = await db.users.findOne({ _id: MUUID.from(userID) });
+        const { libraryName, email } = args;
+        const foundUser = await db.users.findOne({ email });
         const foundLibrary = await db.libraries.findOne({ name: libraryName });
         const libraryPath = path.join(PUBLIC_DIRECTORY, libraryName);
         const existingLibraryDir = fs.existsSync(libraryPath);
@@ -208,13 +216,69 @@ function createResolvers(app: FastifyDbInstance): IResolvers {
         // Create new library (mongodb)
         const createdLibrary = await db.libraries.insertOne({
           name: libraryName,
-          userID: MUUID.from(userID),
+          userID: foundUser._id,
           folders: [],
         });
 
-        const binary = createdLibrary.insertedId;
-        const id = db.stringify(binary.buffer);
+        const id = db.stringify(createdLibrary.insertedId.buffer);
+
         return { id, name: libraryName };
+      },
+      createLibraryWithFolder: async (_parent, args, _context, _info) => {
+        const { libraryName, email, targetPath } = args;
+        const foundUser = await db.users.findOne({ email });
+        const foundLibrary = await db.libraries.findOne({ name: libraryName });
+        const libraryPath = path.join(PUBLIC_DIRECTORY, libraryName);
+        const existingLibraryDir = fs.existsSync(libraryPath);
+        const directoryName = path.basename(targetPath);
+
+        if (!foundUser) {
+          throw new Error("Invalid user.");
+        }
+
+        // Can't create a library if it already exists
+        if (foundLibrary) {
+          throw new Error(`Library "${libraryName}" already exists`);
+        }
+
+        if (!foundLibrary && existingLibraryDir) {
+          throw new Error(
+            `${libraryPath} already exists, this shouldn't happen. Please delete it.`
+          );
+        }
+
+        // Creaate new library (directory)
+        fs.mkdirSync(libraryPath);
+
+        // Create new library (mongodb)
+        const publicPath = path.join(
+          PUBLIC_DIRECTORY,
+          libraryName,
+          directoryName
+        );
+
+        const folder: Folder = {
+          basePath: targetPath,
+          publicPath: publicPath,
+        };
+
+        const createdLibrary = await db.libraries.insertOne({
+          name: libraryName,
+          userID: foundUser._id,
+          folders: [folder],
+        });
+
+        try {
+          await symlinkDir(targetPath, libraryName);
+        } catch (err) {
+          throw new Error(JSON.stringify(err));
+        }
+        return {
+          id: db.stringify(createdLibrary.insertedId.buffer),
+          userID: db.stringify(foundUser._id.buffer),
+          name: libraryName,
+          folders: [folder],
+        };
       },
       deleteLibrary: async (_parent, args, _context, _info) => {
         const { id, libraryName } = args;
@@ -235,14 +299,10 @@ function createResolvers(app: FastifyDbInstance): IResolvers {
         return { id, name: libraryName };
       },
       addFolder: async (_parent, args, _context, _info) => {
-        const { targetPath, libraryID, libraryName } = args;
+        const { targetPath, libraryName } = args;
         const foundLibrary = await db.libraries.findOne({ name: libraryName });
         if (!foundLibrary) {
           throw new Error("Invalid library.");
-        }
-
-        if (db.stringify(foundLibrary._id.buffer) !== libraryID) {
-          throw new Error("Invalid arguments.");
         }
 
         const directoryName = path.basename(targetPath);
@@ -275,10 +335,7 @@ function createResolvers(app: FastifyDbInstance): IResolvers {
           throw new Error(JSON.stringify(err));
         }
 
-        return {
-          ...folder,
-          libraryID: foundLibrary._id.buffer,
-        };
+        return folder;
       },
       removeFolder: async (_parent, args, _context, _info) => {
         const { publicPath, libraryID, libraryName } = args;

@@ -41,7 +41,7 @@ export type User = {
 
 export type Library = {
   __typename?: "Library";
-  _id: Scalars["ID"];
+  id: Scalars["ID"];
   userID: Scalars["ID"];
   name: Scalars["String"];
   folders: Array<Folder>;
@@ -49,7 +49,6 @@ export type Library = {
 
 export type Folder = {
   __typename?: "Folder";
-  libraryID: Scalars["ID"];
   basePath: Scalars["String"];
   publicPath: Scalars["String"];
 };
@@ -68,6 +67,7 @@ export type Mutation = {
   __typename?: "Mutation";
   login?: Maybe<User>;
   createUser?: Maybe<User>;
+  createLibraryWithFolder?: Maybe<Library>;
   createLibrary?: Maybe<Library>;
   deleteLibrary?: Maybe<Library>;
   addFolder: Folder;
@@ -84,9 +84,15 @@ export type MutationcreateUserArgs = {
   password: Scalars["String"];
 };
 
+export type MutationcreateLibraryWithFolderArgs = {
+  libraryName: Scalars["String"];
+  email: Scalars["String"];
+  targetPath: Scalars["String"];
+};
+
 export type MutationcreateLibraryArgs = {
   libraryName: Scalars["String"];
-  userID: Scalars["ID"];
+  email: Scalars["String"];
 };
 
 export type MutationdeleteLibraryArgs = {
@@ -96,7 +102,6 @@ export type MutationdeleteLibraryArgs = {
 
 export type MutationaddFolderArgs = {
   targetPath: Scalars["String"];
-  libraryID: Scalars["ID"];
   libraryName: Scalars["String"];
 };
 
@@ -246,7 +251,7 @@ export type LibraryResolvers<
   ContextType = MercuriusContext,
   ParentType extends ResolversParentTypes["Library"] = ResolversParentTypes["Library"]
 > = {
-  _id?: Resolver<ResolversTypes["ID"], ParentType, ContextType>;
+  id?: Resolver<ResolversTypes["ID"], ParentType, ContextType>;
   userID?: Resolver<ResolversTypes["ID"], ParentType, ContextType>;
   name?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
   folders?: Resolver<Array<ResolversTypes["Folder"]>, ParentType, ContextType>;
@@ -257,7 +262,6 @@ export type FolderResolvers<
   ContextType = MercuriusContext,
   ParentType extends ResolversParentTypes["Folder"] = ResolversParentTypes["Folder"]
 > = {
-  libraryID?: Resolver<ResolversTypes["ID"], ParentType, ContextType>;
   basePath?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
   publicPath?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
   isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
@@ -291,11 +295,20 @@ export type MutationResolvers<
     ContextType,
     RequireFields<MutationcreateUserArgs, "email" | "password">
   >;
+  createLibraryWithFolder?: Resolver<
+    Maybe<ResolversTypes["Library"]>,
+    ParentType,
+    ContextType,
+    RequireFields<
+      MutationcreateLibraryWithFolderArgs,
+      "libraryName" | "email" | "targetPath"
+    >
+  >;
   createLibrary?: Resolver<
     Maybe<ResolversTypes["Library"]>,
     ParentType,
     ContextType,
-    RequireFields<MutationcreateLibraryArgs, "libraryName" | "userID">
+    RequireFields<MutationcreateLibraryArgs, "libraryName" | "email">
   >;
   deleteLibrary?: Resolver<
     Maybe<ResolversTypes["Library"]>,
@@ -307,10 +320,7 @@ export type MutationResolvers<
     ResolversTypes["Folder"],
     ParentType,
     ContextType,
-    RequireFields<
-      MutationaddFolderArgs,
-      "targetPath" | "libraryID" | "libraryName"
-    >
+    RequireFields<MutationaddFolderArgs, "targetPath" | "libraryName">
   >;
   removeFolder?: Resolver<
     ResolversTypes["Folder"],
@@ -360,14 +370,13 @@ export interface Loaders<
   };
 
   Library?: {
-    _id?: LoaderResolver<Scalars["ID"], Library, {}, TContext>;
+    id?: LoaderResolver<Scalars["ID"], Library, {}, TContext>;
     userID?: LoaderResolver<Scalars["ID"], Library, {}, TContext>;
     name?: LoaderResolver<Scalars["String"], Library, {}, TContext>;
     folders?: LoaderResolver<Array<Folder>, Library, {}, TContext>;
   };
 
   Folder?: {
-    libraryID?: LoaderResolver<Scalars["ID"], Folder, {}, TContext>;
     basePath?: LoaderResolver<Scalars["String"], Folder, {}, TContext>;
     publicPath?: LoaderResolver<Scalars["String"], Folder, {}, TContext>;
   };

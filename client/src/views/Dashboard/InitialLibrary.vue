@@ -2,35 +2,67 @@
 import Button from "@/components/Button.vue";
 import LogoIcon from "@/components/icons/Logo.vue";
 import TextInput from "@/components/inputs/TextInput.vue";
-import { reactive, ref, watch } from "vue";
+import useAuth from "@/use/auth";
+import { useMutation } from "villus";
+import { computed, reactive, ref, watch } from "vue";
 
+const { auth, refetchUserData } = useAuth();
 const libraryName = ref("");
-const folderPath = ref("");
 const activeTabIndex = ref(0);
 const tabs = ["Library Name", "Folders"];
 const showFolderInputModal = ref(false);
 const selectedFolder = reactive([]);
+const folderPath = computed(() => {
+  return "/" + selectedFolder.join("/");
+});
 const dirStack = ref([]);
+const CreateLibrary = `
+  mutation CreateLibraryWithFolder ($email: String!, $libraryName: String!, $targetPath: String!) {
+    createLibraryWithFolder(email: $email, libraryName: $libraryName, targetPath: $targetPath) {
+      id
+    }
+  }
+`;
+const { data, error, isFetching, execute } = useMutation(CreateLibrary);
 async function updateDirTree() {
   const response = await fetch("http://localhost:3000/dir-autocompletion", {
     headers: {
       "Content-Type": "application/json",
     },
     method: "POST",
-    body: JSON.stringify({ input: "/" + selectedFolder.join("/") }),
+    body: JSON.stringify({ input: folderPath.value }),
   });
   const data = await response.json();
   dirStack.value = data;
 }
 
 async function goOutOneDir() {
-  selectedFolder.pop()
+  selectedFolder.pop();
+}
+updateDirTree();
+function handleNextBtn() {
+  if (activeTabIndex.value === tabs.length - 1) {
+    createLibrary();
+  } else {
+    activeTabIndex.value++;
+  }
 }
 
-updateDirTree();
+async function createLibrary() {
+  const result = await execute({
+    email: auth.value.user?.email,
+    libraryName: libraryName.value,
+    targetPath: folderPath.value,
+  });
+
+  if (result.error) {
+    // TODO: error handling
+  } else {
+    await refetchUserData();
+  }
+}
 
 watch(selectedFolder, () => {
-  console.log("hi");
   updateDirTree();
 });
 </script>
@@ -42,17 +74,30 @@ watch(selectedFolder, () => {
     @click.self="showFolderInputModal = false"
   >
     <div id="folder-input-modal" class="modal d-flex">
-      <div class="left-panel desktop-text-large">
+      <div class="left-panel desktop-text-large overflow-y-scroll">
         <ul>
-          <li @click="goOutOneDir">..</li>
-          <li v-for="dir in dirStack" @click="selectedFolder.push(dir)">
+          <li @click="goOutOneDir">.. [Back]</li>
+          <li
+            :key="dir"
+            v-for="dir in dirStack"
+            @click="selectedFolder.push(dir)"
+          >
             {{ dir }}
           </li>
         </ul>
       </div>
       <div
         class="main-panel d-flex justify-content-center align-items-center justify-content-around"
-      ></div>
+      >
+        <Button
+          class="action-btn"
+          size="medium"
+          type="primary"
+          @click="showFolderInputModal = false"
+        >
+          Add
+        </Button>
+      </div>
     </div>
   </div>
 
@@ -71,6 +116,7 @@ watch(selectedFolder, () => {
       <div class="left-panel desktop-link-x-small">
         <ul>
           <li
+            :key="tab"
             v-for="(tab, index) in tabs"
             class="transition"
             :class="{ active: index === activeTabIndex }"
@@ -82,10 +128,11 @@ watch(selectedFolder, () => {
       </div>
       <form
         class="main-panel d-flex justify-content-center align-items-center justify-content-around"
-        @submit.prevent="activeTabIndex++"
+        @submit.prevent="handleNextBtn"
+        autocomplete="off"
       >
         <TextInput
-          v-show="activeTabIndex === 0"
+          v-if="activeTabIndex === 0"
           class="mb-10"
           size="medium"
           type="underlined"
@@ -94,7 +141,7 @@ watch(selectedFolder, () => {
           v-model:value="libraryName"
         />
         <TextInput
-          v-show="activeTabIndex === 1"
+          v-if="activeTabIndex === 1"
           class="mb-10"
           size="medium"
           type="underlined"
@@ -102,22 +149,18 @@ watch(selectedFolder, () => {
           name="libraryName"
           v-model:value="folderPath"
           @click="showFolderInputModal = true"
-          disabled
         />
         <Button
-          v-show="activeTabIndex === 1"
+          @click.prevent="showFolderInputModal = true"
+          v-if="activeTabIndex === 1"
           size="small"
           type="secondary"
           darkMode
           >Browse...</Button
         >
-        <Button
-          class="action-btn"
-          size="small"
-          type="primary"
-          @click="activeTabIndex++"
-          >{{ activeTabIndex < tabs.length - 1 ? "Next" : "Finish" }}</Button
-        >
+        <Button class="action-btn" size="small" type="primary">{{
+          activeTabIndex < tabs.length - 1 ? "Next" : "Finish"
+        }}</Button>
       </form>
     </div>
   </div>

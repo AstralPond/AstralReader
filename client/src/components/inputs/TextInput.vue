@@ -24,7 +24,7 @@ const props = withDefaults(defineProps<Props>(), {
   inputType: "text",
   showIcon: false,
   darkMode: true,
-  disabled: false
+  disabled: false,
 });
 
 const emit = defineEmits<{
@@ -113,6 +113,7 @@ const inputClassObj = computed(() => ({
         @input="emit('update:value', ($event.target as HTMLInputElement).value)"
         @focus="isFocused = true"
         @blur="isFocused = false"
+        @click="emit('click')"
       />
       <InputXIcon
         class="x-icon pos-absolute z-10 transition"

@@ -7,7 +7,7 @@ export type DirPath = string | Buffer | URL;
 
 export const getDirectories = (source: DirPath) =>
   readdirSync(source, { withFileTypes: true })
-    .filter((dirent) => dirent.isDirectory())
+    .filter((dirent) => dirent.isDirectory() && dirent.name[0] !== ".")
     .map((dirent) => dirent.name);
 
 /**
