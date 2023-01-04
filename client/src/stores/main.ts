@@ -3,7 +3,7 @@ import { computed, reactive } from "vue";
 
 export interface User {
   email: string;
-  libraries: Library[];
+  libraries?: Library[];
 }
 
 export interface Library {
@@ -30,7 +30,7 @@ export const useStore = defineStore("main", (): State => {
   const auth: Auth = reactive({
     user: null,
     libraryCount: computed(() => {
-      return auth?.user?.libraries.length || 0;
+      return auth?.user?.libraries?.length || 0;
     }),
     isAuthenticated: computed(() => {
       return !!auth?.user?.email;

@@ -66,7 +66,6 @@ export type QueryuserArgs = {
 export type Mutation = {
   __typename?: "Mutation";
   login?: Maybe<User>;
-  createUser?: Maybe<User>;
   createLibraryWithFolder?: Maybe<Library>;
   createLibrary?: Maybe<Library>;
   deleteLibrary?: Maybe<Library>;
@@ -75,11 +74,6 @@ export type Mutation = {
 };
 
 export type MutationloginArgs = {
-  email: Scalars["String"];
-  password: Scalars["String"];
-};
-
-export type MutationcreateUserArgs = {
   email: Scalars["String"];
   password: Scalars["String"];
 };
@@ -288,12 +282,6 @@ export type MutationResolvers<
     ParentType,
     ContextType,
     RequireFields<MutationloginArgs, "email" | "password">
-  >;
-  createUser?: Resolver<
-    Maybe<ResolversTypes["User"]>,
-    ParentType,
-    ContextType,
-    RequireFields<MutationcreateUserArgs, "email" | "password">
   >;
   createLibraryWithFolder?: Resolver<
     Maybe<ResolversTypes["Library"]>,

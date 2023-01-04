@@ -6,7 +6,7 @@ import useAuth from "@/use/auth";
 import { useMutation } from "villus";
 import { computed, reactive, ref, watch } from "vue";
 
-const { auth, refetchUserData } = useAuth();
+const { auth, fetchUserData } = useAuth();
 // Used to store value for library name text input
 const libraryName = ref("");
 // Used to change tabs on the side of the smaller (initial) modal
@@ -66,7 +66,7 @@ async function createLibrary() {
   if (result.error) {
     // TODO: error handling
   } else {
-    await refetchUserData();
+    await fetchUserData();
   }
 }
 
@@ -77,45 +77,49 @@ watch(selectedFolder, () => {
 
 <template>
   <div
-    v-show="showFolderInputModal"
-    class="fullscreen modal-container bg-alias-grayscale-body"
-    @click.self="showFolderInputModal = false"
-  >
-    <div
-      id="folder-input-modal"
-      class="modal pos-relative d-flex pos-absolute transform-center elevate-3 bg-alias-grayscale-header-weak overflow-hidden"
-    >
-      <div class="left-panel desktop-text-large overflow-y-scroll">
-        <ul>
-          <li @click="goOutOneDir">.. [Back]</li>
-          <li
-            :key="dir"
-            v-for="dir in dirStack"
-            @click="selectedFolder.push(dir)"
-          >
-            {{ dir }}
-          </li>
-          <li v-show="dirStack.length > 0" @click="goOutOneDir">.. [Back]</li>
-        </ul>
-      </div>
-      <div
-        class="main-panel d-flex justify-content-center align-items-center justify-content-around"
-      >
-        <Button
-          class="pos-absolute bottom-8 right-8"
-          size="medium"
-          type="primary"
-          @click="showFolderInputModal = false"
-        >
-          Add
-        </Button>
-      </div>
-    </div>
-  </div>
-
-  <div
     class="fullscreen bg-alias-grayscale-body text-center d-flex justify-content-center flex-column align-items-center"
   >
+    <Transition name="fade">
+      <div
+        v-show="showFolderInputModal"
+        class="fullscreen modal-container bg-alias-grayscale-body"
+        @click.self="showFolderInputModal = false"
+      >
+        <div
+          id="folder-input-modal"
+          class="modal pos-relative d-flex pos-absolute transform-center elevate-3 bg-alias-grayscale-header-weak overflow-hidden"
+        >
+          <div class="left-panel desktop-text-large overflow-y-scroll">
+            <ul>
+              <li @click="goOutOneDir">.. [Back]</li>
+              <li
+                :key="dir"
+                v-for="dir in dirStack"
+                @click="selectedFolder.push(dir)"
+              >
+                {{ dir }}
+              </li>
+              <li v-show="dirStack.length > 0" @click="goOutOneDir">
+                .. [Back]
+              </li>
+            </ul>
+          </div>
+          <div
+            class="main-panel d-flex justify-content-center align-items-center justify-content-around"
+          >
+            <Button
+              class="pos-absolute bottom-8 right-8"
+              size="medium"
+              type="primary"
+              @click="showFolderInputModal = false"
+            >
+              Add
+            </Button>
+          </div>
+        </div>
+      </div>
+    </Transition>
+
     <h2
       class="d-flex align-items-center flex-column pos-absolute left-10 top-10"
     >

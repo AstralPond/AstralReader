@@ -13,6 +13,7 @@
   transform: translate(-50%, -50%);
 }
 
+// display
 @each $display in variables.$displays {
   .d-#{$display} {
     display: $display;
@@ -67,6 +68,7 @@
   }
 }
 
+// overflow
 @each $value in variables.$overflow-values {
   .overflow-#{$value} {
     overflow: $value;
@@ -78,4 +80,17 @@
   .overflow-y-#{$value} {
     overflow-x: $value;
   }
+}
+
+$viewportCount: 5;
+
+@while $viewportCount <= 100 {
+  .vw-#{$viewportCount} {
+    width: #{$viewportCount}vw;
+  }
+  .vh-#{$viewportCount} {
+    height: #{$viewportCount}vh;
+  }
+
+  $viewportCount: $viewportCount + 5;
 }
