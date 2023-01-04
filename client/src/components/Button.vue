@@ -11,6 +11,7 @@ export interface Props {
   darkMode?: boolean;
   showIcon?: boolean;
   iconPosition?: "left" | "right";
+  color?: string;
 }
 const props = withDefaults(defineProps<Props>(), {
   showIcon: false,
@@ -18,16 +19,19 @@ const props = withDefaults(defineProps<Props>(), {
   darkMode: false,
 });
 
-const buttonClassObj = computed(() => ({
-  [props.size]: true,
-  [props.type]: true,
-  "dark-mode": props.darkMode,
-  "light-mode": !props.darkMode,
-}));
+const buttonClassObj = computed(() => {
+  return {
+    [props.size]: true,
+    [props.type]: true,
+    "dark-mode": props.darkMode,
+    "light-mode": !props.darkMode,
+  };
+});
 </script>
 
 <template>
   <button
+    :style="props.color ? `background-color: ${props.color}` : ''"
     class="desktop-link-medium px-8 transition d-flex justify-content-center align-items-center gap-x-4"
     :class="buttonClassObj"
   >

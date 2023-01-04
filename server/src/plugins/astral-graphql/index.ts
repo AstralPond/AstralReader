@@ -11,7 +11,7 @@ import mercuriusCodegen, { gql } from "mercurius-codegen";
 import path from "path";
 import MUUID from "uuid-mongodb";
 
-interface FastifyDbInstance extends FastifyInstance {
+export interface FastifyDbInstance extends FastifyInstance {
   db: CustomDb;
 }
 
@@ -74,7 +74,6 @@ export const schema = gql`
 
   type Mutation {
     login(email: String!, password: String!): User
-    createUser(email: String!, password: String!): User
     createLibraryWithFolder(
       libraryName: String!
       email: String!
@@ -161,36 +160,6 @@ function createResolvers(app: FastifyDbInstance): IResolvers {
 
         throw new Error("Email or password incorrect");
       },
-      createUser: async (_parent, args, _context, _info) => {
-        try {
-          const { email, password } = args;
-
-          const foundUser = await db.users.findOne({ email });
-
-          // Don't create user if user with given email already exists
-          if (foundUser) {
-            throw new Error("User already exists.");
-          }
-
-          const hashedPassword = await bcrypt
-            .hash(password, Number(process.env.SALT_ROUNDS))
-            .catch((_err) => {
-              throw new Error("Bycrpt hashing failed.");
-            });
-
-          const createdUser = await db.users.insertOne({
-            email,
-            password: hashedPassword,
-            libraries: [],
-          });
-          const binary = createdUser.insertedId;
-          const id = db.stringify(binary.buffer);
-
-          return { id, email };
-        } catch (err) {
-          throw new Error(JSON.stringify(err));
-        }
-      },
       createLibrary: async (_parent, args, _context, _info) => {
         const { libraryName, email } = args;
         const foundUser = await db.users.findOne({ email });
@@ -230,7 +199,10 @@ function createResolvers(app: FastifyDbInstance): IResolvers {
       createLibraryWithFolder: async (_parent, args, _context, _info) => {
         const { libraryName, email, targetPath } = args;
         const foundUser = await db.users.findOne({ email });
-        const foundLibrary = await db.libraries.findOne({ name: libraryName });
+        const foundLibrary = await db.libraries.findOne({
+          userID: foundUser?._id,
+          name: libraryName,
+        });
         const libraryPath = path.join(PUBLIC_DIRECTORY, libraryName);
         const existingLibraryDir = fs.existsSync(libraryPath);
         const directoryName = path.basename(targetPath);

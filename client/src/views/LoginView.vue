@@ -1,15 +1,10 @@
 <script setup lang="ts">
 import Button from "@/components/Button.vue";
 import TextInput from "@/components/inputs/TextInput.vue";
-import { useStore } from "@/stores/main";
 import useAuth from "@/use/auth";
 import { reactive } from "vue";
-import { useRouter } from "vue-router";
 
-const router = useRouter();
-const store = useStore();
-
-const { login } = useAuth(store, router);
+const { login } = useAuth();
 
 const form = reactive({
   email: "",
@@ -71,6 +66,12 @@ function submit() {
           >
           <!-- <button class="btn">Log In</button> -->
         </form>
+        <p class="mt-6 alias-grayscale-line desktop-text-small text-center">
+          Need an account?
+          <RouterLink class="link-dark desktop-link-small" to="/signup"
+            >Sign up here</RouterLink
+          >
+        </p>
       </div>
     </div>
   </div>

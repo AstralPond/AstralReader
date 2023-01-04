@@ -3,3 +3,24 @@
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 150ms;
 }
+
+.fade-enter-active,
+.fade-leave-active {
+  transition-property: opacity;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+.page-fade-enter-active,
+.page-fade-leave-active {
+  transition: opacity 0.5s ease;
+  transition-timing-function: ease;
+  transition-duration: 300ms;
+}
+
+.page-fade-enter-from,
+.page-fade-leave-to,
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}

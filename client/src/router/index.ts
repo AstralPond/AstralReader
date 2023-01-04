@@ -1,6 +1,8 @@
 import DashboardView from "@/views/Dashboard/index.vue";
 import InitialSetupView from "@/views/Dashboard/InitialLibrary.vue";
 import LoginView from "@/views/LoginView.vue";
+import SignUpView from "@/views/SignUpView.vue";
+
 import {
   createRouter,
   createWebHistory,
@@ -22,6 +24,11 @@ const routes: Array<RouteRecordRaw> = [
     path: "/initial-setup",
     name: "initialSetup",
     component: InitialSetupView,
+  },
+  {
+    path: "/signup",
+    name: "signup",
+    component: SignUpView,
   },
 ];
 

@@ -1,4 +1,7 @@
+import { FastifyDbInstance } from "@/plugins/astral-graphql";
 import loginRoute from "@plugins/routes/gatekeeper/login";
+import signupRoute from "@plugins/routes/gatekeeper/signup";
+
 import { FastifyInstance } from "fastify";
 import jwt from "jsonwebtoken";
 import { gql } from "mercurius-codegen";
@@ -12,6 +15,7 @@ interface Payload {
 
 export default function routes(app: FastifyInstance) {
   loginRoute(app);
+  signupRoute(app as FastifyDbInstance);
 
   // Checks if JWT token from cookie is valid
   app.get("/gatekeeper", async (req, reply) => {

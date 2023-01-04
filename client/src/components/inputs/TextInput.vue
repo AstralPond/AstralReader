@@ -73,6 +73,8 @@ const divClassObj = computed(() => ({
   [props.type]: true,
   "py-2": props.size === "medium",
   "py-3": props.size === "large",
+  dark: props.darkMode,
+  light: !props.darkMode,
 }));
 
 const svgClassObj = computed(() => ({
@@ -194,30 +196,59 @@ div#container {
 
   &.default {
     border: 2px solid transparent;
-    background-color: functions.get-color("alias", "grayscale", "header-weak");
     border-radius: 1.2rem;
     overflow: hidden;
 
-    &:focus-within {
-      background-color: functions.get-color("alias", "grayscale", "header");
-      border: 2px solid functions.get-color("alias", "grayscale", "line");
-      outline: none;
-    }
+    &.light {
+      background-color: functions.get-color("alias", "grayscale", "input");
+      &:focus-within {
+        background-color: functions.get-color("alias", "grayscale", "bg");
+        border: 2px solid functions.get-color("alias", "grayscale", "header");
+        outline: none;
+      }
 
-    label {
-      color: functions.get-color("alias", "grayscale", "line");
-    }
+      label {
+        color: functions.get-color("alias", "grayscale", "label");
+      }
 
-    input {
+      input {
+        background-color: functions.get-color("alias", "grayscale", "input");
+        color: functions.get-color("alias", "grayscale", "header");
+
+        &:focus {
+          background-color: functions.get-color("alias", "grayscale", "bg");
+        }
+      }
+    }
+    &.dark {
+      border: 2px solid transparent;
       background-color: functions.get-color(
         "alias",
         "grayscale",
         "header-weak"
       );
-      color: functions.get-color("alias", "grayscale", "bg");
 
-      &:focus {
+      &:focus-within {
         background-color: functions.get-color("alias", "grayscale", "header");
+        border: 2px solid functions.get-color("alias", "grayscale", "line");
+        outline: none;
+      }
+
+      label {
+        color: functions.get-color("alias", "grayscale", "line");
+      }
+
+      input {
+        background-color: functions.get-color(
+          "alias",
+          "grayscale",
+          "header-weak"
+        );
+        color: functions.get-color("alias", "grayscale", "bg");
+
+        &:focus {
+          background-color: functions.get-color("alias", "grayscale", "header");
+        }
       }
     }
   }
